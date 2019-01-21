@@ -48,6 +48,7 @@ def generate_test_data(voc_dir, mel_dir, k=1, **kwargs):
 
     mel_basis = librosa.filters.mel(sr, n_fft, n_mels)
 
+    samples = librosa.core.time_to_samples(duration, sr)
     filter_pred = lambda f: librosa.core.get_duration(filename=f) >= duration
     get_path = lambda dname: map(lambda f: os.path.join(dname, f), os.listdir(dname))
     voc_files = list(filter(filter_pred, get_path(voc_dir)))
@@ -63,7 +64,7 @@ def generate_test_data(voc_dir, mel_dir, k=1, **kwargs):
             mel_file = choice(mel_files)
             mel_offset = uniform(0, librosa.core.get_duration(filename=mel_file)-duration)
             mel, _ = librosa.core.load(mel_file, sr=sr, offset=mel_offset, duration=duration)
-            if voc.shape != mel.shape:
+            if voc.size != samples or mel.size != samples:
                 continue
 
             random_loudness = lambda x: np.e**(gauss(0, 1)) * x
