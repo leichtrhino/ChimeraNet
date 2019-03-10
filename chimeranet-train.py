@@ -70,9 +70,9 @@ def main():
         }):
             model = load_model(args.previous_model)
 
-    train_generator = generate_data(args.voc_dir, args.mel_dir, k=args.batch_size, duration=args.duration, n_mels=args.n_mels)
+    train_generator = generate_data(args.voc_dir, args.mel_dir, k=args.batch_size, duration=args.duration, n_mels=args.n_mels, sr=args.sr)
     if all((args.validation_voc_dir, args.validation_mel_dir, args.validation_steps)):
-        validation_generator = generate_data(args.validation_voc_dir, args.validation_mel_dir, k=args.batch_size, duration=args.duration, n_mels=args.n_mels)
+        validation_generator = generate_data(args.validation_voc_dir, args.validation_mel_dir, k=args.batch_size, duration=args.duration, n_mels=args.n_mels, sr=args.sr)
     else:
         validation_generator = None
     history = model.fit_generator(
