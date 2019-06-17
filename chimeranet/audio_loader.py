@@ -52,7 +52,7 @@ class TarAudioLoader(AudioLoader):
         self.path = path
         self.tf = tarfile.open(tarpath)
         self.name_list = list(
-            i.name for i in tf.getmembers()
+            i.name for i in self.tf.getmembers()
             if i.name.startswith(path) and i.isfile()
         )
     def __del__(self):
