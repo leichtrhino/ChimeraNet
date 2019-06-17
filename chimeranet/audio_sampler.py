@@ -21,6 +21,9 @@ class SpectrogramSampler:
     def add_reader(self, audio_reader):
         self._audio_readers.append(audio_reader)
         return self
+    
+    def add_loader(self, audio_loader):
+        return self.add_reader(audio_loader)
 
     def sync_flag(self, sync_flag):
         self._sync_flag = sync_flag
