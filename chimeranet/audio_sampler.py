@@ -61,6 +61,14 @@ class SpectrogramSampler:
     def get_number_of_channels(self):
         return len(self._audio_readers)
     
+    def get_frames(self):
+        return librosa.core.time_to_frames(
+            self._time_in_sec, sr=self._sr, hop_length=self._hop_length
+        )
+    
+    def get_number_of_mel_bins(self):
+        return self._n_mels
+    
     def _make_index_for_reader(self):
         if self._sync_flag:
             idx = [random.randrange(0, min(map(len, self._audio_readers)))]\
@@ -143,14 +151,17 @@ class SpectrogramSampler:
         mel_specs = [np.dot(mel_basis, s**2) for s in mod_specs]
         return mel_specs
 
-    def make_speclist(self):
+    def make_specs_single(self):
         idx = self._make_index_for_reader()
         raw_audio_list = [
             a.load_audio(i, self._sr) for a, i in zip(self._audio_readers, idx)
         ]
         spec_list = self._transform_audio(raw_audio_list)
-        return spec_list
+        return np.array(spec_list)
+    
+    def make_specs(self, sample_size=1):
+        return np.stack([self.make_specs_single() for _ in range(sample_size)])
 
-    def generate_speclist(self):
+    def generate_specs(self, batch_size=1):
         while True:
-            yield self.make_audioset()
+            yield self.make_specs(batch_size)

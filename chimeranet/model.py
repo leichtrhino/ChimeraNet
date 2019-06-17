@@ -6,25 +6,31 @@ from keras.layers import Input, Lambda, Reshape, Activation
 from keras.layers import Dense, LSTM, Bidirectional
 
 def loss_deepclustering(y_true, y_pred):
-    C, (batch_size, T, F, D) = K.int_shape(y_true)[-1], K.int_shape(y_pred)
+    C, (_, T, F, D) = K.int_shape(y_true)[-1], K.int_shape(y_pred)
     if C is None:
         C = 1
     y_true_flatten = K.reshape(y_true, (-1, T*F, C))
     y_pred_flatten = K.reshape(y_pred, (-1, T*F, D))
     A = K.batch_dot(
         y_true_flatten,
-        K.permute_dimensions(y_true_flatten, (0, 2, 1)), axes=[2, 1]
+        K.permute_dimensions(y_true_flatten, (0, 2, 1)),
+        axes=(2, 1)
     )
     Ahat = K.batch_dot(
         y_pred_flatten,
-        K.permute_dimensions(y_pred_flatten, (0, 2, 1)), axes=[2, 1]
+        K.permute_dimensions(y_pred_flatten, (0, 2, 1)),
+        axes=(2, 1)
     )
-    return K.sum(K.pow(A - Ahat, 2), axis=(1, 2)) / K.cast(F*T, K.floatx())
+    return K.sum(K.pow(A - Ahat, 2), axis=(1, 2))\
+        / K.cast(F*T, K.floatx())
 
 def loss_mask(y_true, y_pred):
-    batch_size, T, F, C = K.int_shape(y_pred)
+    _, T, F, C = K.int_shape(y_pred)
     mixture = K.expand_dims(y_true[:, :, :, C])
-    return K.sum(K.pow((y_true[:, :, :, :C] - y_pred)*mixture, 2), axis=(1, 2, 3))
+    return K.sum(
+        K.pow((y_true[:, :, :, :C] - y_pred)*mixture, 2),
+        axis=(1, 2, 3)
+    )
 
 def build_model(T, F, C, D, n_blstm_units=500, n_blstm_layers=4):
     inputs = Input(shape=(T, F), name='input')
