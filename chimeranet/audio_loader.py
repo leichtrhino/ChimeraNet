@@ -31,17 +31,17 @@ class ZipAudioLoader(AudioLoader):
         super().__init__()
         self.zippath = zippath
         self.path = path
-        with zipfile.ZipFile(zippath) as zf:
-            self.name_list = list(
-                i.filename for i in zf.infolist()
-                if i.filename.startswith(path) and not i.is_dir()
-            )
+        self.zf = zipfile.ZipFile(zippath)
+        self.name_list = list(
+            i.filename for i in self.zf.infolist()
+            if i.filename.startswith(path) and not i.is_dir()
+        )
+    def __del__(self):
+        self.zf.close()
     def load_audio(self, index, sr):
-        with zipfile.ZipFile(self.zippath) as zf:
-            b = zf.read(self.name_list[index])
-            data, samplerate = soundfile.read(io.BytesIO(b))
-        data = data.T
-        return librosa.to_mono(librosa.resample(data, samplerate, sr))
+        b = self.zf.read(self.name_list[index])
+        data, samplerate = soundfile.read(io.BytesIO(b))
+        return librosa.to_mono(librosa.resample(data.T, samplerate, sr))
     def __len__(self):
         return len(self.name_list)
 
@@ -50,16 +50,16 @@ class TarAudioLoader(AudioLoader):
         super().__init__()
         self.tarpath = tarpath
         self.path = path
-        with tarfile.open(tarpath) as tf:
-            self.name_list = list(
-                i.name for i in tf.getmembers()
-                if i.name.startswith(path) and i.isfile()
-            )
+        self.tf = tarfile.open(tarpath)
+        self.name_list = list(
+            i.name for i in tf.getmembers()
+            if i.name.startswith(path) and i.isfile()
+        )
+    def __del__(self):
+        self.tf.close()
     def load_audio(self, index, sr):
-        with tarfile.open(self.tarpath) as tf:
-            with tf.extractfile(self.name_list[index]) as f:
-                data, samplerate = soundfile.read(f)
-        data = data.T
-        return librosa.to_mono(librosa.resample(data, samplerate, sr))
+        with self.tf.extractfile(self.name_list[index]) as f:
+            data, samplerate = soundfile.read(f)
+        return librosa.to_mono(librosa.resample(data.T, samplerate, sr))
     def __len__(self):
         return len(self.name_list)
