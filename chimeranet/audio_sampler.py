@@ -1,7 +1,9 @@
 
+import math
 import random
 import librosa
 import numpy as np
+import scipy
 
 from .audio_loader import AudioLoader
 
@@ -80,63 +82,49 @@ class SpectrogramSampler:
             idx = [random.randrange(0, len(a)) for a in self._audio_readers]
         return idx
     
-    def _stretch_time(self, raw_audio_list):
+    def _transform_specs(self, raw_spec_list):
+        # transform time, pitch, amplitude
+        time_lo, time_hi = self._augment_time_lo, self._augment_time_hi
         if self._sync_flag:
-            rates = [
-                random.uniform(self._augment_time_lo, self._augment_time_hi)
-            ] * len(raw_audio_list)
+            time_rates = [random.uniform(time_lo, time_hi)] * len(raw_spec_list)
         else:
-            rates = [
-                random.uniform(self._augment_time_lo, self._augment_time_hi)
-                for _ in range(len(raw_audio_list))
+            time_rates = [
+                random.uniform(time_lo, time_hi) for _ in raw_spec_list
             ]
-        return [
-            librosa.effects.time_stretch(y, r)
-            for y, r in zip(raw_audio_list, rates)
-        ]
-    
-    def _pitch_shift(self, raw_audio_list):
-        bins_per_octave = self._n_mels * 8
+        freq_lo, freq_hi = self._augment_freq_lo, self._augment_freq_hi
+        orig_height = min(spec.shape[0] for spec in raw_spec_list)
         if self._sync_flag:
-            n_steps = [int(
-                random.uniform(self._augment_freq_lo, self._augment_freq_hi)\
-                    * bins_per_octave
-            )] * len(raw_audio_list)
+            freq_rates = [
+                2 ** random.uniform(freq_lo, freq_hi)
+            ] * len(raw_spec_list)
         else:
-            n_steps = [int(
-                random.uniform(self._augment_freq_lo, self._augment_freq_hi)\
-                    * bins_per_octave
-            ) for _ in range(len(raw_audio_list))]
-        return [
-            librosa.effects.pitch_shift(y, self._sr, n, bins_per_octave)
-            for y, n in zip(raw_audio_list, n_steps)
+            freq_rates = [
+                2 ** random.uniform(freq_lo, freq_hi) for _ in raw_spec_list
+            ]
+        mod_specs = [
+            scipy.ndimage.zoom(s, (fr, 1/tr), order=0)
+            for s, tr, fr in zip(raw_spec_list, time_rates, freq_rates)
         ]
-    
-    def _modify_amplitude(self, spectrograms):
-        return [
-            librosa.core.db_to_amplitude(
-                librosa.core.amplitude_to_db(spectrogram)
-                + random.uniform(self._augment_amp_lo, self._augment_amp_hi)
-            ) for spectrogram in spectrograms
+        mod_specs = [
+            np.vstack((s, np.zeros((orig_height - s.shape[0], s.shape[1]))))
+            if s.shape[0] < orig_height else s[:orig_height, :]
+            for s in mod_specs
         ]
-    
-    def _transform_audio(self, raw_audio_list):
-        audio_list = self._pitch_shift(self._stretch_time(raw_audio_list))
-        specs = [
-            np.abs(librosa.core.stft(audio, self._n_fft, self._hop_length))
-            for audio in audio_list
+        amp_lo, amp_hi = self._augment_amp_lo, self._augment_amp_hi
+        mod_specs = [
+            s * 10 ** (random.uniform(amp_lo, amp_hi) / 10)
+            for s in mod_specs
         ]
-        mod_specs = self._modify_amplitude(specs)
-        
+
         T = librosa.core.time_to_frames(
             self._time_in_sec, sr=self._sr, hop_length=self._hop_length
         )
         n_frames_min = min(x.shape[1] for x in mod_specs)
         if self.sync_flag and n_frames_min > T:
             offset = [random.randrange(0, n_frames_min - T)]\
-                * len(raw_audio_list)    
+                * len(raw_spec_list)    
         elif self.sync_flag and n_frames_min <= T:
-            offset = [0] * len(raw_audio_list)
+            offset = [0] * len(raw_spec_list)
         else:
             offset = [
                 random.randrange(0, x.shape[1] - T) if x.shape[1] > T else 0
@@ -154,17 +142,57 @@ class SpectrogramSampler:
         mel_specs = [np.dot(mel_basis, s**2) for s in mod_specs]
         return mel_specs
 
-    def make_specs_single(self):
-        idx = self._make_index_for_reader()
+    def make_specs(self, sample_size=1, loads_per_channel=1):
+        if type(loads_per_channel) == int:
+            loads_per_channel = [
+                loads_per_channel for _ in range(len(self._audio_readers))
+            ]
+        if len(loads_per_channel) != len(self._audio_readers):
+            raise ValueError('length of loads_per_channel does not match')
+        if self._sync_flag\
+            and any(l != loads_per_channel[0] for l in loads_per_channel):
+            raise ValueError('different loads for time sync mode')
+        # n_channel x n_loads
+        idx = tuple(zip(*[
+            self._make_index_for_reader() for _ in range(max(loads_per_channel))
+        ]))
         raw_audio_list = [
-            a.load_audio(i, self._sr) for a, i in zip(self._audio_readers, idx)
+            [a.load_audio(i, self._sr) for mi, i in enumerate(ii) if mi < loads_per_channel[li]]
+            for li, (a, ii) in enumerate(zip(self._audio_readers, idx))
         ]
-        spec_list = self._transform_audio(raw_audio_list)
-        return np.array(spec_list)
-    
-    def make_specs(self, sample_size=1):
-        return np.stack([self.make_specs_single() for _ in range(sample_size)])
+        raw_spec_list = [
+            [
+                np.abs(librosa.core.stft(audio, self._n_fft, self._hop_length))
+                for audio in channel
+            ]
+            for channel in raw_audio_list
+        ]
+        # n_sample x n_channel
+        if self._sync_flag:
+            spec_idx = list(range(max(loads_per_channel)))\
+                *int(math.ceil(sample_size / max(loads_per_channel)))
+            random.shuffle(spec_idx)
+            spec_idx = spec_idx[:sample_size]
+            spec_idx = [[i]*len(self._audio_readers) for i in spec_idx]
+        else:
+            spec_idx = [
+                [random.randrange(0, lpc) for lpc in loads_per_channel]
+                for _ in range(sample_size)
+            ]
+        return np.stack([
+            np.array(self._transform_specs(
+                [raw_spec_list[ci][si] for ci, si in enumerate(sidx)]
+            ))
+            for sidx in spec_idx
+        ])
 
-    def generate_specs(self, batch_size=1):
+    def generate_specs(self, batch_size=1, loads_per_channel=1, shuffle_batch=1):
         while True:
-            yield self.make_specs(batch_size)
+            rand_idx = np.arange(batch_size * shuffle_batch)
+            np.random.shuffle(rand_idx)
+            samples = np.concatenate([
+                self.make_specs(batch_size, loads_per_channel)
+                for _ in range(shuffle_batch)
+            ])[rand_idx]
+            for i in range(shuffle_batch):
+                yield samples[i*batch_size:(i+1)*batch_size, :]

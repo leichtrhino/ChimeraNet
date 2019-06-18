@@ -41,7 +41,7 @@ class ZipAudioLoader(AudioLoader):
     def load_audio(self, index, sr):
         b = self.zf.read(self.name_list[index])
         data, samplerate = soundfile.read(io.BytesIO(b))
-        return librosa.to_mono(librosa.resample(data.T, samplerate, sr))
+        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
     def __len__(self):
         return len(self.name_list)
 
@@ -60,6 +60,6 @@ class TarAudioLoader(AudioLoader):
     def load_audio(self, index, sr):
         with self.tf.extractfile(self.name_list[index]) as f:
             data, samplerate = soundfile.read(f)
-        return librosa.to_mono(librosa.resample(data.T, samplerate, sr))
+        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
     def __len__(self):
         return len(self.name_list)
