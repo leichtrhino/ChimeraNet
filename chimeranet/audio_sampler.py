@@ -74,13 +74,34 @@ class SpectrogramSampler:
     def get_number_of_mel_bins(self):
         return self._n_mels
     
-    def _make_index_for_reader(self):
-        if self._sync_flag:
-            idx = [random.randrange(0, min(map(len, self._audio_readers)))]\
-                * len(self._audio_readers)
-        else:
-            idx = [random.randrange(0, len(a)) for a in self._audio_readers]
-        return idx
+    def _make_index_for_reader(self, loads_per_channel):
+        # n_channel x loads_per_channel
+        min_len = min(map(len, self._audio_readers))
+        n_loads = min(loads_per_channel)
+        n_channels = len(self._audio_readers)
+        def make_random(N, M):
+            return np.random.randint(0, M, size=(N,))
+        def make_range_shuffle(N, M):
+            idx = np.arange(M).repeat(int(math.ceil(N // M + 1)))
+            np.random.shuffle(idx)
+            return idx[:N]
+        
+        if self._sync_flag and min_len > n_loads * 100:
+            # large audio library, make sample_size random indices
+            return make_random(n_loads, min_len)\
+                .repeat(n_channels).reshape((n_loads, n_channels)).T
+        elif self._sync_flag and min_len <= n_loads * 100:
+            # small audio library, make 0-sample_size array and shuffle
+            return make_range_shuffle(n_loads, min_len)\
+                .repeat(n_channels).reshape((n_loads, n_channels)).T
+        else: # if not self._sync_flag
+            return [
+                make_random(lpc, len(ar))
+                if len(ar) > lpc * 100 else
+                make_range_shuffle(lpc, len(ar))
+                for lpc, ar in zip(loads_per_channel, self._audio_readers)
+            ]
+        # end function
     
     def _transform_specs(self, raw_spec_list):
         # transform time, pitch, amplitude
@@ -153,9 +174,7 @@ class SpectrogramSampler:
             and any(l != loads_per_channel[0] for l in loads_per_channel):
             raise ValueError('different loads for time sync mode')
         # n_channel x n_loads
-        idx = tuple(zip(*[
-            self._make_index_for_reader() for _ in range(max(loads_per_channel))
-        ]))
+        idx = self._make_index_for_reader(loads_per_channel)
         raw_audio_list = [
             [a.load_audio(i, self._sr) for mi, i in enumerate(ii) if mi < loads_per_channel[li]]
             for li, (a, ii) in enumerate(zip(self._audio_readers, idx))
