@@ -29,8 +29,8 @@ def main():
     ss.sync_flag(True)
 
     ss_val = SpectrogramSampler()
-    ss_val.add_reader(DSD100VocalLoader('DSD100.zip', validation=True))
-    ss_val.add_reader(DSD100MelodyLoader('DSD100.zip', validation=True))    
+    ss_val.add_reader(DSD100VocalLoader('DSD100.zip', test=True))
+    ss_val.add_reader(DSD100MelodyLoader('DSD100.zip', test=True))    
     ss_val.time(time).n_mels(n_mels).sr(sr).n_fft(n_fft).hop_length(hop_length)
     ss_val.sync_flag(True)
     
