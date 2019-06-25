@@ -29,9 +29,12 @@ class ChimeraNetModel:
                 / K.cast_to_floatx(self.F*self.T)
         return _loss_deepclustering
 
-    def loss_mask(self):
+    def loss_mask(self, scaled=True):
         def _loss_mask(y_true, y_pred):
             mixture = K.expand_dims(y_true[:, :, :, self.C])
+            if scaled:
+                mixture = mixture\
+                    * K.cast_to_floatx(self.F*self.T) / K.sum(mixture)
             return K.sum(
                 K.pow((y_true[:, :, :, :self.C] - y_pred)*mixture, 2),
                 axis=(1, 2, 3)
