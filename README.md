@@ -4,18 +4,18 @@ An implementation of music separation model by Luo et.al.
 ### Requirements
 
 * keras
-* librosa
 * sklearn
-* matplotlib (optional)
+* librosa
+* soundfile
+* ffmpeg (in path, required in VoxCeleb2Loader)
 
-### chimeranet-train.py
-Training ChimeraNet model from voice and melody audio.
+### Install
 
-### chimeranet-test.py
-Evaluation of a ChimeraNet model.
+TODO
 
-### chimeranet-separate.py
-Separation of mix audio with ChimeraNet model.
+### Sample separation task
+
+See scripts in `sample`
 
 ### See also
 
