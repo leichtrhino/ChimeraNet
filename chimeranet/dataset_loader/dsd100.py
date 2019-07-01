@@ -38,6 +38,7 @@ class DSD100Loader(AudioLoader):
             else:
                 data_, samplerate = soundfile.read(io.BytesIO(b))
                 data += data_
+        data /= len(self.inst_list)
         return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
     def __len__(self):
         return len(self.name_list)
