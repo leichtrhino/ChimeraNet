@@ -161,7 +161,7 @@ class AudioMixer:
             rates = [random.uniform(*r) for r in self._augment_amp_list]
         def mod_single(t):
             a, r = t
-            return a * 10 ** (r / 10)
+            return np.clip(a * 10 ** (r / 20), -1., 1.)
         return list(map(mod_single, zip(audio_list, rates)))
     
     def _transform_specs(self, audio_list):
