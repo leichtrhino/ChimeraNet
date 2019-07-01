@@ -3,6 +3,7 @@ import os
 import io
 import tarfile
 import zipfile
+import numpy as np
 import librosa
 import soundfile
 
@@ -11,6 +12,15 @@ class AudioLoader:
         return None
     def __len__(self):
         return 0
+
+class FakeAudioLoader:
+    def __init__(self, n_samples, audio_size):
+        self.n_samples = n_samples
+        self.audio_size = audio_size
+    def load_audio(self, index, sr):
+        return np.ones(self.audio_size)
+    def __len__(self):
+        return self.n_samples
 
 class DirAudioLoader(AudioLoader):
     def __init__(self, path):
