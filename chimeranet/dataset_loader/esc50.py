@@ -42,3 +42,21 @@ class ESC50Loader(AudioLoader):
         )
         zf.close()
         return [cat[1] for cat in cats]
+    @staticmethod
+    def major_categories():
+        return ['animals', 'natural', 'human', 'interior', 'exterior']
+    @staticmethod
+    def categories_of(major_categories):
+        categories = {
+            'animals': ['dog', 'rooster', 'pig', 'cow', 'frog', 'cat', 'hen', 'insects', 'sheep', 'crow'],
+            'natural': ['rain', 'sea_waves', 'crackling_fire', 'crickets', 'chirping_birds', 'water_drops', 'wind', 'pouring_water', 'toilet_flush', 'thunderstorm'],
+            'human': ['crying_baby', 'sneezing', 'clapping', 'breathing', 'coughing', 'footsteps', 'laughing', 'brushing_teeth', 'snoring', 'drinking_sipping'],
+            'interior': ['door_wood_knock', 'mouse_click', 'keyboard_typing', 'door_wood_creaks', 'can_opening', 'washing_machine', 'vacuum_cleaner', 'clock_alarm', 'clock_tick', 'glass_breaking'],
+            'exterior': ['helicopter', 'chainsaw', 'siren', 'car_horn', 'engine', 'train', 'church_bells', 'airplane', 'fireworks', 'hand_saw']
+        }
+        if type(major_categories) == str:
+            major_categories = [major_categories]
+        return sum((categories[c] for c in major_categories), [])
+    @staticmethod
+    def all_categories():
+        return ESC50Loader.categories_of(ESC50Loader.major_categories())
