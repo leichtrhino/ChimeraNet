@@ -189,7 +189,6 @@ class AudioMixer:
             ]
             for ii in idx
         ]
-        print(len(raw_audio_list))
         mod = lambda a: self._mod_amp(self._mod_freq(self._mod_time(a)))
         mod_audio_list = list(map(mod, raw_audio_list))
         mod_spec_list = list(map(self._transform_specs, mod_audio_list))
