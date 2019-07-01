@@ -24,7 +24,7 @@ class ESC50Loader(AudioLoader):
         ]
     def __del__(self):
         self.zf.close()
-    def load_audio(self, index, sr):
+    def _load_audio(self, index, sr):
         b = self.zf.read('ESC-50-master/audio/'+self.name_list[index])
         data, samplerate = soundfile.read(io.BytesIO(b))
         return librosa.resample(librosa.to_mono(data.T), samplerate, sr)

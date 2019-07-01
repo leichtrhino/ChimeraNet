@@ -29,7 +29,7 @@ class DSD100Loader(AudioLoader):
         )
     def __del__(self):
         self.zf.close()
-    def load_audio(self, index, sr):
+    def _load_audio(self, index, sr):
         data = None
         for inst in self.inst_list:
             b = self.zf.read(self.name_list[index]+inst+'.wav')
