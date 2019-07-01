@@ -82,9 +82,14 @@ class AudioMixer:
         min_len = min(map(len, self._audio_readers))
         n_channels = len(self._audio_readers)
         def make_range_shuffle(N, M):
-            idx = np.arange(M).repeat(int(math.ceil(N // M + 1)))
+            idx_sub = np.arange(M)
+            np.random.shuffle(idx_sub)
+            idx = np.hstack((
+                np.arange(M).repeat(int(math.ceil(N // M))).flatten(),
+                idx_sub[:N%M]
+            ))
             np.random.shuffle(idx)
-            return idx[:N]
+            return idx
         
         if self._sync_time_flag:
             # small audio library, make 0-sample_size array and shuffle
