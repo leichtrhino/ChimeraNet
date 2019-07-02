@@ -8,7 +8,12 @@ from itertools import permutations
 from keras.models import load_model
 from keras.utils import CustomObjectScope
 
-sys.path.append(os.path.join(os.path.split(__file__)[0], '..'))
+if not importlib.util.find_spec('chimeranet'):
+    print('ChimeraNet is not installed, import from source.')
+    sys.path.append(os.path.join(os.path.split(__file__)[0], '..'))
+else:
+    print('Using installed ChimeraNet.')
+
 from chimeranet.model import ChimeraNetModel
 from chimeranet.postprocessing import from_embedding, from_mask
 from chimeranet.window_util import split_window, merge_windows_mean, merge_windows_most_common
@@ -18,7 +23,7 @@ def main():
     time = 0.5
     sr, n_fft, hop_length, n_mels = 16000, 512, 128, 64
     model_path = 'model_trisep.h5'
-    audio_path = 'ep01.mono.wav'
+    audio_path = 'path-to-wav.wav'
     output_prefix = 'out'
     embd_name = 'embd'
     mask_name = 'mask'
