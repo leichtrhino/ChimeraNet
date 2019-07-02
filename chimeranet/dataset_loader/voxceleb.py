@@ -37,7 +37,7 @@ class VoxCelebLoader(AudioLoader):
             self.dev_zf.close()
         if self.test_zf:
             self.test_zf.close()
-    def load_audio(self, index, sr):
+    def _load_audio(self, index, sr):
         name, arc = self.name_list[index]
         zf = self.dev_zf if arc == 'dev' else self.test_zf
         data, samplerate = soundfile.read(io.BytesIO(zf.read(name)))
