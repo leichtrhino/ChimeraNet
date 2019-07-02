@@ -1,11 +1,17 @@
 #!/usr/env/bin python
 import os, sys
+import importlib.util
 import numpy as np
 import pickle
 import h5py
 import librosa
 
-sys.path.append(os.path.join(os.path.split(__file__)[0], '..'))
+if not importlib.util.find_spec('chimeranet'):
+    print('ChimeraNet is not installed, import from source.')
+    sys.path.append(os.path.join(os.path.split(__file__)[0], '..'))
+else:
+    print('Using installed ChimeraNet.')
+
 from chimeranet.model import ChimeraNetModel
 from chimeranet.audio_mixer import AudioMixer
 from chimeranet.dataset_loader.dsd100\
@@ -76,10 +82,9 @@ def main():
     )
 
     # obtain training data from spectrogram sampler and train model
-    #sample_size, batch_size = 32000, 32
-    sample_size, batch_size = 32, 8
+    sample_size, batch_size = 32000, 32
     specs_train = am.make_specs(sample_size)
-    specs_valid = am_val.make_specs(sample_size)
+    specs_valid = am_val.make_specs(sample_size // 100)
     with h5py.File(dataset_path, 'w') as f:
         f.create_dataset('specs_train', data=specs_train)
         f.create_dataset('specs_valid', data=specs_valid)
