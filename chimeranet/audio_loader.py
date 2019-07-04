@@ -8,24 +8,20 @@ import librosa
 import soundfile
 
 class AudioLoader:
-    def __init__(self, cache=True):
-        self.cache = cache
-        self.cached_audio = dict()
+    def __init__(self):
+        pass
     def __del__(self):
-        del self.cached_audio
+        pass
     def load_audio(self, index, sr):
-        if self.cache and index not in self.cached_audio:
-            self.cached_audio[index] = self._load_audio(index, sr)
-        return self.cached_audio[index] if self.cache\
-            else self._load_audio(index, sr)
+        return self._load_audio(index, sr)
     def _load_audio(self, index, sr):
         return None
     def __len__(self):
         return 0
 
 class FakeAudioLoader(AudioLoader):
-    def __init__(self, n_samples, audio_size, cache=False):
-        super().__init__(cache)
+    def __init__(self, n_samples, audio_size):
+        super().__init__()
         self.n_samples = n_samples
         self.audio_size = audio_size
     def _load_audio(self, index, sr):
@@ -34,8 +30,8 @@ class FakeAudioLoader(AudioLoader):
         return self.n_samples
 
 class DirAudioLoader(AudioLoader):
-    def __init__(self, path, cache=True):
-        super().__init__(cache)
+    def __init__(self, path):
+        super().__init__()
         self.path = path
         self.sorted_file_list = sorted(os.listdir(path))
     def _load_audio(self, index, sr):
@@ -48,41 +44,45 @@ class DirAudioLoader(AudioLoader):
         return len(self.sorted_file_list)
 
 class ZipAudioLoader(AudioLoader):
-    def __init__(self, zippath, path, cache=True):
-        super().__init__(cache)
+    def __init__(self, zippath, path):
+        super().__init__()
         self.zippath = zippath
         self.path = path
-        self.zf = zipfile.ZipFile(zippath)
+        zf = zipfile.ZipFile(zippath)
         self.name_list = list(
-            i.filename for i in self.zf.infolist()
+            i.filename for i in zf.infolist()
             if i.filename.startswith(path) and not i.is_dir()
         )
+        zf.close()
     def __del__(self):
-        self.zf.close()
         super().__del__()
     def _load_audio(self, index, sr):
-        b = self.zf.read(self.name_list[index])
+        zf = zipfile.ZipFile(self.zippath)
+        b = zf.read(self.name_list[index])
         data, samplerate = soundfile.read(io.BytesIO(b))
+        zf.close()
         return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
     def __len__(self):
         return len(self.name_list)
 
 class TarAudioLoader(AudioLoader):
-    def __init__(self, tarpath, path, cache=True):
-        super().__init__(cache)
+    def __init__(self, tarpath, path):
+        super().__init__()
         self.tarpath = tarpath
         self.path = path
-        self.tf = tarfile.open(tarpath)
+        tf = tarfile.open(tarpath)
         self.name_list = list(
             i.name for i in self.tf.getmembers()
             if i.name.startswith(path) and i.isfile()
         )
+        tf.close()
     def __del__(self):
-        self.tf.close()
         super().__del__()
     def load_audio(self, index, sr):
+        tf = tarfile.open(self.tarpath)
         with self.tf.extractfile(self.name_list[index]) as f:
             data, samplerate = soundfile.read(f)
+        tf.close()
         return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
     def __len__(self):
         return len(self.name_list)

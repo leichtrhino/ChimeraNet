@@ -1,4 +1,7 @@
 
+import sys
+import os
+import multiprocessing
 import math
 import random
 import librosa
@@ -20,9 +23,6 @@ class AudioMixer:
         self.hop_length(512)
         self.sync_flag(True)
     
-    def __del__(self):
-        del self.audio_readers
-
     def add_loader(
         self, audio_loader, a_time=(1, 1), a_freq=(0, 0), a_amp=(0, 0)):
         self._audio_readers.append(audio_loader)
@@ -186,21 +186,27 @@ class AudioMixer:
         mel_basis = librosa.filters.mel(self._sr, self._n_fft, self._n_mels)
         mel_specs = [np.dot(mel_basis, s**2) for s in mod_specs]
         return mel_specs
-
-    def make_specs(self, sample_size=1):
-        # n_samples x n_channels
-        idx = self._make_index_for_reader(sample_size)
+    
+    def make_single_specs(self, idx):
         raw_audio_list = [
-            [
-                a.load_audio(i, self._sr)
-                for a, i in zip(self._audio_readers, ii)
-            ]
-            for ii in idx
+            a.load_audio(i, self._sr) for a, i in zip(self._audio_readers, idx)
         ]
         mod = lambda a: self._mod_amp(self._mod_freq(self._mod_time(a)))
-        mod_audio_list = list(map(mod, raw_audio_list))
-        mod_spec_list = list(map(self._transform_specs, mod_audio_list))
-        return np.array(mod_spec_list)
+        return self._transform_specs(mod(raw_audio_list))
+
+    def make_specs(self, sample_size=1, n_jobs=-1):
+        # n_samples x n_channels
+        if n_jobs <= 0:
+            n_jobs = os.cpu_count()
+        idx = self._make_index_for_reader(sample_size)
+        if n_jobs > 1:
+            p = multiprocessing.Pool(n_jobs, maxtasksperchild=1)
+            samples = np.array(list(p.map(self.make_single_specs, idx)))
+            p.close()
+            p.join()
+        else:
+            samples = np.array(list(map(self.make_single_specs, idx)))
+        return samples
 
     def generate_specs(self, batch_size=1, loads_per_channel=1, shuffle_batch=1):
         while True:
