@@ -6,9 +6,11 @@ import sklearn
 input: NxTxFxD tensor
 output: NxCxFxT tensor
 """
-def from_embedding(embedding, n_channels):
+def from_embedding(embedding, n_channels, n_jobs=-1):
     embedding_dim = embedding.shape[-1]
-    labels = sklearn.cluster.KMeans(n_clusters=n_channels).fit(
+    labels = sklearn.cluster.KMeans(
+        n_clusters=n_channels, n_jobs=n_jobs
+    ).fit(
         embedding.reshape(embedding.size // embedding_dim, embedding_dim)
     ).labels_
     mask = np.eye(n_channels)[labels]\
