@@ -208,13 +208,10 @@ class AudioMixer:
             samples = np.array(list(map(self.make_single_specs, idx)))
         return samples
 
-    def generate_specs(self, batch_size=1, loads_per_channel=1, shuffle_batch=1):
+    def generate_specs(self, batch_size=1, n_batch=1, n_jobs=-1):
         while True:
             rand_idx = np.arange(batch_size * shuffle_batch)
             np.random.shuffle(rand_idx)
-            samples = np.concatenate([
-                self.make_specs(batch_size, loads_per_channel)
-                for _ in range(shuffle_batch)
-            ])[rand_idx]
-            for i in range(shuffle_batch):
+            samples = self.make_specs(batch_size * n_batch, n_jobs)[rand_idx]
+            for i in range(n_batch):
                 yield samples[i*batch_size:(i+1)*batch_size, :]
