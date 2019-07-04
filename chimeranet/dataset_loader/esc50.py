@@ -8,8 +8,8 @@ import soundfile
 from ..audio_loader import AudioLoader
 
 class ESC50Loader(AudioLoader):
-    def __init__(self, path, category_list, fold=(1, 2, 3, 4)):
-        super().__init__()
+    def __init__(self, path, category_list, fold=(1, 2, 3, 4), cache=True):
+        super().__init__(cache)
         name_col_idx, fold_col_idx, category_col_idx = 0, 1, 3
         self.zf = zipfile.ZipFile(path)
         rows = self.zf.read('ESC-50-master/meta/esc50.csv')\
@@ -24,6 +24,7 @@ class ESC50Loader(AudioLoader):
         ]
     def __del__(self):
         self.zf.close()
+        super().__del__()
     def _load_audio(self, index, sr):
         b = self.zf.read('ESC-50-master/audio/'+self.name_list[index])
         data, samplerate = soundfile.read(io.BytesIO(b))

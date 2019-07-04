@@ -9,8 +9,8 @@ from itertools import chain
 from ..audio_loader import AudioLoader
 
 class VoxCelebLoader(AudioLoader):
-    def __init__(self, dev_path=None, test_path=None):
-        super().__init__()
+    def __init__(self, dev_path=None, test_path=None, cache=True):
+        super().__init__(cache)
         self.dev_zf, self.test_zf = None, None
         namelistiter = []
         if dev_path:
@@ -37,6 +37,7 @@ class VoxCelebLoader(AudioLoader):
             self.dev_zf.close()
         if self.test_zf:
             self.test_zf.close()
+        super().__del__()
     def _load_audio(self, index, sr):
         name, arc = self.name_list[index]
         zf = self.dev_zf if arc == 'dev' else self.test_zf

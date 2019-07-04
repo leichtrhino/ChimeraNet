@@ -8,20 +8,24 @@ import librosa
 import soundfile
 
 class AudioLoader:
-    def __init__(self):
+    def __init__(self, cache=True):
+        self.cache = cache
         self.cached_audio = dict()
+    def __del__(self):
+        del self.cached_audio
     def load_audio(self, index, sr):
-        if index not in self.cached_audio:
+        if self.cache and index not in self.cached_audio:
             self.cached_audio[index] = self._load_audio(index, sr)
-        return self.cached_audio[index]
+        return self.cached_audio[index] if self.cache\
+            else self._load_audio(index, sr)
     def _load_audio(self, index, sr):
         return None
     def __len__(self):
         return 0
 
 class FakeAudioLoader(AudioLoader):
-    def __init__(self, n_samples, audio_size):
-        super().__init__()
+    def __init__(self, n_samples, audio_size, cache=False):
+        super().__init__(cache)
         self.n_samples = n_samples
         self.audio_size = audio_size
     def _load_audio(self, index, sr):
@@ -30,8 +34,8 @@ class FakeAudioLoader(AudioLoader):
         return self.n_samples
 
 class DirAudioLoader(AudioLoader):
-    def __init__(self, path):
-        super().__init__()
+    def __init__(self, path, cache=True):
+        super().__init__(cache)
         self.path = path
         self.sorted_file_list = sorted(os.listdir(path))
     def _load_audio(self, index, sr):
@@ -44,8 +48,8 @@ class DirAudioLoader(AudioLoader):
         return len(self.sorted_file_list)
 
 class ZipAudioLoader(AudioLoader):
-    def __init__(self, zippath, path):
-        super().__init__()
+    def __init__(self, zippath, path, cache=True):
+        super().__init__(cache)
         self.zippath = zippath
         self.path = path
         self.zf = zipfile.ZipFile(zippath)
@@ -55,6 +59,7 @@ class ZipAudioLoader(AudioLoader):
         )
     def __del__(self):
         self.zf.close()
+        super().__del__()
     def _load_audio(self, index, sr):
         b = self.zf.read(self.name_list[index])
         data, samplerate = soundfile.read(io.BytesIO(b))
@@ -63,8 +68,8 @@ class ZipAudioLoader(AudioLoader):
         return len(self.name_list)
 
 class TarAudioLoader(AudioLoader):
-    def __init__(self, tarpath, path):
-        super().__init__()
+    def __init__(self, tarpath, path, cache=True):
+        super().__init__(cache)
         self.tarpath = tarpath
         self.path = path
         self.tf = tarfile.open(tarpath)
@@ -74,6 +79,7 @@ class TarAudioLoader(AudioLoader):
         )
     def __del__(self):
         self.tf.close()
+        super().__del__()
     def load_audio(self, index, sr):
         with self.tf.extractfile(self.name_list[index]) as f:
             data, samplerate = soundfile.read(f)

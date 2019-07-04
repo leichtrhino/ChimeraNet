@@ -19,6 +19,9 @@ class AudioMixer:
         self.n_fft(2048)
         self.hop_length(512)
         self.sync_flag(True)
+    
+    def __del__(self):
+        del self.audio_readers
 
     def add_loader(
         self, audio_loader, a_time=(1, 1), a_freq=(0, 0), a_amp=(0, 0)):

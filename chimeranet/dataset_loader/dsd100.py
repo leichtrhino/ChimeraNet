@@ -9,8 +9,8 @@ from ..audio_loader import AudioLoader
 
 class DSD100Loader(AudioLoader):
     # inst_list contains ('bass', 'drums', 'other', 'vocals')
-    def __init__(self, path, inst_list, dev=True, test=False):
-        super().__init__()
+    def __init__(self, path, inst_list, dev=True, test=False, cache=True):
+        super().__init__(cache)
         self.path = path
         self.inst_list = inst_list
         prefix_list = []
@@ -29,6 +29,7 @@ class DSD100Loader(AudioLoader):
         )
     def __del__(self):
         self.zf.close()
+        super().__del__()
     def _load_audio(self, index, sr):
         data = None
         for inst in self.inst_list:
@@ -44,9 +45,9 @@ class DSD100Loader(AudioLoader):
         return len(self.name_list)
 
 class DSD100MelodyLoader(DSD100Loader):
-    def __init__(self, path, dev=True, test=False):
-        super().__init__(path, ['bass', 'drums', 'other'], dev, test)
+    def __init__(self, path, dev=True, test=False, cache=True):
+        super().__init__(path, ['bass', 'drums', 'other'], dev, test, cache)
 
 class DSD100VocalLoader(DSD100Loader):
-    def __init__(self, path, dev=True, test=False):
-        super().__init__(path, ['vocals'], dev, test)
+    def __init__(self, path, dev=True, test=False, cache=True):
+        super().__init__(path, ['vocals'], dev, test, cache)

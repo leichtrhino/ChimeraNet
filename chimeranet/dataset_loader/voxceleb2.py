@@ -9,8 +9,8 @@ import subprocess
 from .voxceleb import VoxCelebLoader
 
 class VoxCeleb2Loader(VoxCelebLoader):
-    def __init__(self, dev_path=None, test_path=None):
-        super().__init__(dev_path, test_path)
+    def __init__(self, dev_path=None, test_path=None, cache=True):
+        super().__init__(dev_path, test_path, cache)
     def _load_audio(self, index, sr):
         name, arc = self.name_list[index]
         zf = self.dev_zf if arc == 'dev' else self.test_zf
