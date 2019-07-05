@@ -6,6 +6,9 @@ import pickle
 import h5py
 import librosa
 
+if __name__ == '__mp_main__': # suppress import message on worker
+    sys.stdout = sys.stderr = open(os.devnull, 'w')
+
 if not importlib.util.find_spec('chimeranet'):
     print('ChimeraNet is not installed, import from source.')
     sys.path.append(os.path.join(os.path.split(__file__)[0], '..'))
@@ -22,8 +25,8 @@ from chimeranet.preprocessing import to_mixture, to_true_pair
 
 def main():
     # parameters
-    time = 0.5
-    sr, n_fft, hop_length, n_mels = 16000, 512, 128, 64
+    time = 0.75
+    sr, n_fft, hop_length, n_mels = 16000, 512, 128, 96
     dataset_path = 'dataset_trisep.h5'
     model_path = 'model_trisep.h5'
     history_path = 'history_trisep.json.pkl'
@@ -40,15 +43,15 @@ def main():
     am = AudioMixer()
     am.add_loader(
         VoxCelebLoader(dev_path=vox_dev_path),
-        a_time=(0.5, 2), a_freq=(-1, 1), a_amp=(-20, 10)
+        a_time=(-1, 1), a_freq=(-1, 1), a_amp=(-5, 5)
     )
     am.add_loader(
         DSD100MelodyLoader(dsd_path),
-        a_time=(0.5, 2), a_freq=(-1, 1), a_amp=(-20, 10)
+        a_time=(-1, 1), a_freq=(-1, 1), a_amp=(-5, 5)
     )
     am.add_loader(
         ESC50Loader(esc_path, category_list=esc_cat_list, fold=esc_dev_fold),
-        a_time=(0.9, 1.1), a_freq=(-0.2, 0.2), a_amp=(-20, 0)
+        a_time=(-0.3, 0.3), a_freq=(-0.2, 0.2), a_amp=(-10, 0)
     )
     am.time(time).n_mels(n_mels).sr(sr).n_fft(n_fft).hop_length(hop_length)
     am.sync_flag(False)
@@ -66,8 +69,22 @@ def main():
     am_val.time(time).n_mels(n_mels).sr(sr).n_fft(n_fft).hop_length(hop_length)
     am_val.sync_flag(False)
 
+    T, F, C, D = am.get_frames(), n_mels, am.get_number_of_channels(), 20
+
+    # obtain training data from spectrogram sampler and train model
+    sample_size, batch_size = 64000, 32
+    specs_train = am.make_specs(sample_size, n_jobs=16)
+    specs_valid = am_val.make_specs(sample_size // 10, n_jobs=16)
+    with h5py.File(dataset_path, 'w') as f:
+        f.create_dataset('specs_train', data=specs_train)
+        f.create_dataset('specs_valid', data=specs_valid)
+    x_train = to_mixture(specs_train)
+    y_train = to_true_pair(specs_train)
+    x_valid = to_mixture(specs_valid)
+    y_valid = to_true_pair(specs_valid)
+
     # build model
-    cm = ChimeraNetModel(am.get_frames(), n_mels, am.get_number_of_channels(), 20)
+    cm = ChimeraNetModel(T, F, C, D)
     model = cm.build_model()
     model.compile(
         'rmsprop',
@@ -81,22 +98,11 @@ def main():
         }
     )
 
-    # obtain training data from spectrogram sampler and train model
-    sample_size, batch_size = 32000, 32
-    specs_train = am.make_specs(sample_size)
-    specs_valid = am_val.make_specs(sample_size // 100)
-    with h5py.File(dataset_path, 'w') as f:
-        f.create_dataset('specs_train', data=specs_train)
-        f.create_dataset('specs_valid', data=specs_valid)
-    x_train = to_mixture(specs_train)
-    y_train = to_true_pair(specs_train)
-    x_valid = to_mixture(specs_valid)
-    y_valid = to_true_pair(specs_valid)
     history = model.fit(
         x=x_train,
         y=y_train,
         batch_size=batch_size,
-        epochs=30,
+        epochs=10,
         validation_data=(x_valid, y_valid)
     )
     model.save(model_path)
