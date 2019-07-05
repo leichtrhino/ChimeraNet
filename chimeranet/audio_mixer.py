@@ -24,7 +24,7 @@ class AudioMixer:
         self.sync_flag(True)
     
     def add_loader(
-        self, audio_loader, a_time=(1, 1), a_freq=(0, 0), a_amp=(0, 0)):
+        self, audio_loader, a_time=(0, 0), a_freq=(0, 0), a_amp=(0, 0)):
         self._audio_readers.append(audio_loader)
         self._augment_time_list.append(a_time)
         self._augment_freq_list.append(a_freq)
@@ -111,19 +111,19 @@ class AudioMixer:
             max_time_rate = min(t[1] for t in self._augment_time_list)
             assert min_time_rate <= max_time_rate,\
                 'Invalid time augmentation'
-            rates = [random.uniform(min_time_rate, max_time_rate)]\
+            rates = [2**random.uniform(min_time_rate, max_time_rate)]\
                 * len(audio_list)
             offsets = [random.uniform(0, 1)] * len(audio_list)
         else:
             rates = [
-                random.uniform(*t) for t in self._augment_time_list
+                2**random.uniform(*t) for t in self._augment_time_list
             ]
             offsets = [random.uniform(0, 1) for _ in self._augment_time_list]
         def mod_single(t):
             a, r, o = t
             n_slice_samples = librosa.core.time_to_samples(
-                self._time_in_sec / r, sr=self._sr
-            )
+                self._time_in_sec * r, sr=self._sr
+            ) + self._hop_length
             offset = max(0, int(o * (a.size - n_slice_samples)))
             # slice
             sliced = a if a.size < offset + n_slice_samples\
@@ -164,7 +164,11 @@ class AudioMixer:
             rates = [random.uniform(*r) for r in self._augment_amp_list]
         def mod_single(t):
             a, r = t
-            return np.clip(a * 10 ** (r / 20), -1., 1.)
+            S = librosa.core.stft(a, self._n_fft, self._hop_length)
+            Sa, Sp = librosa.core.magphase(S)
+            Sa = (Sa / max(np.max(Sa), 1e-32))**2 * 10**(r/10)
+            a = librosa.core.istft(Sa**0.5 * Sp, self._hop_length)
+            return np.clip(a, -1., 1.)
         return list(map(mod_single, zip(audio_list, rates)))
     
     def _transform_specs(self, audio_list):

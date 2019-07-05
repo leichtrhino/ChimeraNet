@@ -18,6 +18,7 @@ def to_true_pair(multichannels):
     m = multichannels.transpose((0, 3, 2, 1)) # => NxTxFxC
     C = m.shape[-1]
     mixture = np.expand_dims(m.sum(axis=-1) / C, -1) # => NxTxFx1
+    m += np.random.rand(*m.shape) * 1e-32
     masks = np.eye(C)[
         m.reshape((m.size // C, C)).argmax(axis=-1)
     ].reshape(m.shape) # => NxTxFxC

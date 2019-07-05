@@ -1,3 +1,5 @@
+"""model module
+"""
 
 import numpy as np
 import keras.backend as K
@@ -6,7 +8,11 @@ from keras.layers import Input, Lambda, Reshape, Activation
 from keras.layers import Dense, LSTM, Bidirectional
 
 class ChimeraNetModel:
+    """ChimeraNetModel class
+    """
     def __init__(self, time_frames, mel_bins, n_channels, d_embeddings):
+        """
+        """
         self.T = time_frames
         self.F = mel_bins
         self.C = n_channels
