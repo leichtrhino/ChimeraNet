@@ -1,21 +1,31 @@
 # ChimeraNet
 An implementation of music separation model by Luo et.al.
 
-### Requirements
+### Sample separation tasks and model
 
-* keras
-* sklearn
-* librosa
-* soundfile
-* ffmpeg (in path, required in VoxCeleb2Loader)
+See `sample` folder (TBA).
+
+Also, see [Example section on ChimeraNet documentation](https://arity-r.github.io/robust-graph/examples.html).
 
 ### Install
 
-TODO
+##### Requirements
 
-### Sample separation task
+* keras
+* one of keras' backends (i.e. TensorFlow, CNTK, Theano)
+* sklearn
+* librosa
+* soundfile
+* ffmpeg (in PATH, required in VoxCeleb2Loader)
 
-See scripts in `sample`
+##### Instructions
+
+1. Run `pip install git+https://github.com/arity-r/ChimeraNet` or
+any python package installer.
+(Currently, `ChimeraNet` is not in PyPI.)
+2. Install keras' backend if the environment does not have any.
+Install `tensorflow` if unsure.
+3. (Optional) Download ffmpeg binary and place it on PATH.
 
 ### See also
 
