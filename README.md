@@ -5,7 +5,7 @@ An implementation of music separation model by Luo et.al.
 
 See `sample` folder (TBA).
 
-Also, see [Example section on ChimeraNet documentation](https://arity-r.github.io/robust-graph/examples.html).
+Also, see [Example section on ChimeraNet documentation](https://arity-r.github.io/ChimeraNet/examples.html).
 
 ### Install
 
