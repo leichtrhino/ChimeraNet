@@ -189,6 +189,7 @@ class AudioMixer:
         
         mel_basis = librosa.filters.mel(self._sr, self._n_fft, self._n_mels)
         mel_specs = [np.dot(mel_basis, s**2) for s in mod_specs]
+        mel_specs = [np.clip(s - np.min(s), 0, 1) for s in mel_specs]
         return mel_specs
     
     def make_single_specs(self, idx):
