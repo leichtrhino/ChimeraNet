@@ -4,20 +4,22 @@ import io
 import tarfile
 import tempfile
 import librosa
+import soundfile
 import subprocess
 
 from ..audio_loader import AudioLoader
 
 class LMDLoader(AudioLoader):
     # fold = 'def' to validation fold
-    def __init__(self, path=None, fold='0123456789abc'):
+    def __init__(self, path=None, root='lmd_full', fold='0123456789abc'):
         super().__init__()
+        self.root = root
         self.path = path
         tf = tarfile.open(path)
         self.name_list =  [
             i.name for i in tf.getmembers()
             if i.isfile() and\
-                any(i.name.startswith('lmd_full/{}/'.format(p)) for p in fold)
+                any(i.name.startswith('{}/{}/'.format(root, p)) for p in fold)
         ]
         tf.close()
     def __len__(self):
@@ -40,3 +42,12 @@ class LMDLoader(AudioLoader):
             data, _ = librosa.load(ofn, sr=sr)
         tf.close()
         return data
+
+class LMDWavLoader(LMDLoader):
+    def load_audio(self, index, sr):
+        name = self.name_list[index]
+        tf = tarfile.open(self.path)
+        with tf.extractfile(name) as f:
+            data, samplerate = soundfile.read(f)
+        tf.close()
+        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
