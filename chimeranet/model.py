@@ -21,30 +21,20 @@ class ChimeraNetModel:
         def _loss_deepclustering(y_true, y_pred):
             y_true_flatten = K.reshape(y_true, (-1, self.T*self.F, self.C))
             y_pred_flatten = K.reshape(y_pred, (-1, self.T*self.F, self.D))
-            A = K.batch_dot(
-                y_true_flatten,
-                K.permute_dimensions(y_true_flatten, (0, 2, 1)),
-                axes=(2, 1)
-            )
-            Ahat = K.batch_dot(
-                y_pred_flatten,
-                K.permute_dimensions(y_pred_flatten, (0, 2, 1)),
-                axes=(2, 1)
-            )
+            A = K.batch_dot(y_true_flatten, y_true_flatten, axes=(2, 2))
+            Ahat = K.batch_dot(y_pred_flatten, y_pred_flatten, axes=(2, 2))
             return K.sum(K.pow(A - Ahat, 2), axis=(1, 2))\
                 / K.cast_to_floatx(self.F*self.T)
         return _loss_deepclustering
 
-    def loss_mask(self, scaled=True):
+    def loss_mask(self):
         def _loss_mask(y_true, y_pred):
             mixture = K.expand_dims(y_true[:, :, :, self.C])
-            if scaled:
-                mixture = mixture\
-                    * K.cast_to_floatx(self.F*self.T) / K.sum(mixture)
+            mixture /= K.sum(mixture)
+            mask_true = y_true[:, :, :, :self.C] 
             return K.sum(
-                K.pow((y_true[:, :, :, :self.C] - y_pred)*mixture, 2),
-                axis=(1, 2, 3)
-            )
+                K.pow((mask_true - y_pred)*mixture, 2), axis=(1, 2, 3)
+            ) * K.cast_to_floatx(self.F*self.T)
         return _loss_mask
 
     def build_model(self, n_blstm_units=500, n_blstm_layers=4):
