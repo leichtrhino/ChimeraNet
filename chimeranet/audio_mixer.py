@@ -166,11 +166,11 @@ class AudioMixer:
             a, r = t
             S = librosa.core.stft(a, self._n_fft, self._hop_length)
             Sa, Sp = librosa.core.magphase(S)
-            Sa = Sa**2
-            Sa = 100 * (Sa - np.min(Sa, 0))\
+            Sa = (Sa - np.min(Sa, 0))\
                 / np.maximum(np.max(Sa, 0) - np.min(Sa, 0), 1e-32)
-            Sa = 10**(r / 10) * Sa
-            return librosa.core.istft(Sa**0.5 * Sp, self._hop_length)
+            Sa = 10**(r / 10) * Sa ** 2
+            a = librosa.core.istft(Sa**0.5 * Sp, self._hop_length)
+            return np.clip(a, -1., 1.)
         return list(map(mod_single, zip(audio_list, rates)))
     
     def _transform_specs(self, audio_list):
@@ -191,6 +191,7 @@ class AudioMixer:
         
         mel_basis = librosa.filters.mel(self._sr, self._n_fft, self._n_mels)
         mel_specs = [np.dot(mel_basis, s**2) for s in mod_specs]
+        mel_specs = [np.clip(s - np.min(s), 0, 1) for s in mel_specs]
         return mel_specs
     
     def make_single_specs(self, idx):
@@ -198,8 +199,7 @@ class AudioMixer:
             a.load_audio(i, self._sr) for a, i in zip(self._audio_readers, idx)
         ]
         mod = lambda a: self._mod_amp(self._mod_freq(self._mod_time(a)))
-        specs = self._transform_specs(mod(raw_audio_list))
-        return specs
+        return self._transform_specs(mod(raw_audio_list))
 
     def make_specs(self, sample_size=1, n_jobs=-1):
         # n_samples x n_channels
