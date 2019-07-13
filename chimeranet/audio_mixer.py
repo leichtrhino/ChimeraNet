@@ -166,7 +166,9 @@ class AudioMixer:
             a, r = t
             S = librosa.core.stft(a, self._n_fft, self._hop_length)
             Sa, Sp = librosa.core.magphase(S)
-            Sa = (Sa / max(np.max(Sa), 1e-32))**2 * 10**(r/10)
+            Sa = (Sa - np.min(Sa, 0))\
+                / np.maximum(np.max(Sa, 0) - np.min(Sa, 0), 1e-32)
+            Sa = 10**(r / 10) * Sa ** 2
             a = librosa.core.istft(Sa**0.5 * Sp, self._hop_length)
             return np.clip(a, -1., 1.)
         return list(map(mod_single, zip(audio_list, rates)))
