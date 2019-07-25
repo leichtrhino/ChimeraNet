@@ -34,9 +34,9 @@ class ChimeraNetModel:
             mixture = K.expand_dims(y_true[:, :, :, self.C])
             mixture /= K.mean(mixture)
             mask_true = y_true[:, :, :, :self.C]
-            return K.sum(
+            return K.sqrt(K.sum(
                 K.pow((mask_true - y_pred)*mixture, 2), axis=(1, 2, 3)
-            ) / 2
+            ))
         return _loss_mask
 
     def build_model(self, n_blstm_units=500, n_blstm_layers=4):
