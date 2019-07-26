@@ -23,9 +23,9 @@ class ChimeraNetModel:
             V = K.reshape(y_pred, (-1, self.T*self.F, self.D))
             Dmat = K.sum(Y*Y, axis=-1, keepdims=True) ** -0.25
             DV, DY = Dmat * V, Dmat * Y
-            a = K.sqrt(K.sum(K.batch_dot(DV, DV, axes=(1, 1))**2, axis=(1, 2)))
-            b = K.sqrt(K.sum(K.batch_dot(DV, DY, axes=(1, 1))**2, axis=(1, 2)))
-            c = K.sqrt(K.sum(K.batch_dot(DY, DY, axes=(1, 1))**2, axis=(1, 2)))
+            a = K.sum(K.batch_dot(DV, DV, axes=(1, 1))**2, axis=(1, 2))
+            b = K.sum(K.batch_dot(DV, DY, axes=(1, 1))**2, axis=(1, 2))
+            c = K.sum(K.batch_dot(DY, DY, axes=(1, 1))**2, axis=(1, 2))
             return (a - 2*b + c) / K.cast_to_floatx(self.F*self.T)
         return _loss_deepclustering
 
@@ -34,9 +34,9 @@ class ChimeraNetModel:
             mixture = K.expand_dims(y_true[:, :, :, self.C])
             mixture /= K.mean(mixture)
             mask_true = y_true[:, :, :, :self.C]
-            return K.sqrt(K.sum(
+            return K.sum(
                 K.pow((mask_true - y_pred)*mixture, 2), axis=(1, 2, 3)
-            ))
+            )
         return _loss_mask
 
     def build_model(self, n_blstm_units=500, n_blstm_layers=4):
