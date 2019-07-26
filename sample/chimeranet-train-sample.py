@@ -5,6 +5,7 @@ import numpy as np
 import pickle
 import h5py
 import librosa
+import importlib
 
 if __name__ == '__mp_main__': # suppress import message on worker
     sys.stdout = sys.stderr = open(os.devnull, 'w')
@@ -69,12 +70,13 @@ def main():
     am_val.time(time).n_mels(n_mels).sr(sr).n_fft(n_fft).hop_length(hop_length)
     am_val.sync_flag(False)
 
-    T, F, C, D = am.get_frames(), n_mels, am.get_number_of_channels(), 20
+    T, F, C, D = am.get_frames(), am.get_number_of_mel_bins(), am.get_number_of_channels(), 20
 
     # obtain training data from spectrogram sampler and train model
     sample_size, batch_size = 64000, 32
+    val_sample_size = 320
     specs_train = am.make_specs(sample_size, n_jobs=16)
-    specs_valid = am_val.make_specs(sample_size // 10, n_jobs=16)
+    specs_valid = am_val.make_specs(val_sample_size, n_jobs=16)
     with h5py.File(dataset_path, 'w') as f:
         f.create_dataset('specs_train', data=specs_train)
         f.create_dataset('specs_valid', data=specs_valid)
