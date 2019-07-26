@@ -78,6 +78,8 @@ class AudioMixer:
         )
     
     def get_number_of_mel_bins(self):
+        if self._n_mels < 0 or self._n_mels > self._n_fft // 2:
+            return self._n_fft // 2 + 1
         return self._n_mels
     
     def _make_index_for_reader(self, n_samples):
@@ -143,7 +145,7 @@ class AudioMixer:
                 * len(audio_list)
         else:
             rates = [random.uniform(*r) for r in self._augment_freq_list]
-        bins_per_octave = self._n_mels * 8
+        bins_per_octave = self.get_number_of_mel_bins() * 8
         def mod_single(t):
             a, r = t
             n_step = int(r * bins_per_octave)
@@ -189,6 +191,9 @@ class AudioMixer:
             for s in raw_spec_list
         ]
         
+        if self.get_number_of_mel_bins() == self._n_fft // 2 + 1:
+            return mod_specs
+
         mel_basis = librosa.filters.mel(self._sr, self._n_fft, self._n_mels)
         mel_specs = [np.dot(mel_basis, s**2) for s in mod_specs]
         return mel_specs
