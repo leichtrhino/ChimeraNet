@@ -26,13 +26,13 @@ from chimeranet.preprocessing import to_mixture, to_true_pair
 
 def main():
     # parameters
-    time = 0.75
-    sr, n_fft, hop_length, n_mels = 16000, 512, 128, 96
+    time = 1.
+    sr, n_fft, hop_length, n_mels = 16000, 512, 128, -1
     dataset_path = 'dataset_trisep.h5'
     model_path = 'model_trisep.h5'
     history_path = 'history_trisep.json.pkl'
 
-    vox_dev_path = 'vox1_dev_wav.zip'
+    vox_dev_path = 'vox1_test_wav.zip'
     vox_test_path = 'vox1_test_wav.zip'
     dsd_path = 'DSD100.zip'
     esc_path = 'ESC-50-master.zip'
@@ -44,15 +44,15 @@ def main():
     am = AudioMixer()
     am.add_loader(
         VoxCelebLoader(dev_path=vox_dev_path),
-        a_time=(-1, 1), a_freq=(-1, 1), a_amp=(-5, 5)
+        a_time=(-0.2, 0.2), a_freq=(-0.1, 0.1), a_amp=(-1, 1)
     )
     am.add_loader(
         DSD100MelodyLoader(dsd_path),
-        a_time=(-1, 1), a_freq=(-1, 1), a_amp=(-5, 5)
+        a_time=(-0.2, 0.2), a_freq=(-0.1, 0.1), a_amp=(-1, 1)
     )
     am.add_loader(
         ESC50Loader(esc_path, category_list=esc_cat_list, fold=esc_dev_fold),
-        a_time=(-0.3, 0.3), a_freq=(-0.2, 0.2), a_amp=(-10, 0)
+        a_time=(-0.1, 0.1), a_freq=(-0.1, 0.1), a_amp=(-20, -10)
     )
     am.time(time).n_mels(n_mels).sr(sr).n_fft(n_fft).hop_length(hop_length)
     am.sync_flag(False)
@@ -73,13 +73,17 @@ def main():
     T, F, C, D = am.get_frames(), am.get_number_of_mel_bins(), am.get_number_of_channels(), 20
 
     # obtain training data from spectrogram sampler and train model
-    sample_size, batch_size = 64000, 32
-    val_sample_size = 320
-    specs_train = am.make_specs(sample_size, n_jobs=16)
-    specs_valid = am_val.make_specs(val_sample_size, n_jobs=16)
+    #sample_size, batch_size = 64000, 32
+    #val_sample_size = 320
+    sample_size = 320
+    batch_size = 4
+    val_sample_size = 4
+    specs_train = am.make_specs(sample_size, n_jobs=4)
+    specs_valid = am_val.make_specs(val_sample_size, n_jobs=4)
     with h5py.File(dataset_path, 'w') as f:
         f.create_dataset('specs_train', data=specs_train)
         f.create_dataset('specs_valid', data=specs_valid)
+    exit()
     x_train = to_mixture(specs_train)
     y_train = to_true_pair(specs_train)
     x_valid = to_mixture(specs_valid)
