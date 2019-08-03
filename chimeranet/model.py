@@ -70,3 +70,23 @@ class ChimeraNetModel:
     
         model = Model(inputs=inputs, outputs=[embedding, mask])
         return model
+
+    def build_model_chimerapp(self, n_blstm_units=500, n_blstm_layers=4):
+        inputs = Input(shape=(self.T, self.F), name='input')
+        blstm_top = inputs
+        for i in range(1, n_blstm_layers+1):
+            blstm_top = Bidirectional(
+                LSTM(n_blstm_units, return_sequences=True),
+                name='body_blstm_{}'.format(i)
+            )(blstm_top)
+
+        embd_linear = Dense(self.F*self.D, activation='tanh', name='embedding_linear')(blstm_top)
+        embd_reshape = Reshape((self.T, self.F, self.D), name='embedding_reshape')(embd_linear)
+        embedding = Lambda(lambda x: K.l2_normalize(x, axis=-1), name='embedding')(embd_reshape)
+
+        mask_linear = Dense(self.F*self.C, activation='sigmoid', name='mask_linear')(blstm_top)
+        mask_reshape = Reshape((self.T, self.F, self.C), name='mask_reshape')(mask_linear)
+        mask = Lambda(lambda x: x / K.sum(x, axis=-1, keepdims=True), name='mask')(mask_reshape)
+
+        model = Model(inputs=inputs, outputs=[embedding, mask])
+        return model
