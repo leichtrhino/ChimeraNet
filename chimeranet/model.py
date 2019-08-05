@@ -71,7 +71,9 @@ class ChimeraNetModel:
         model = Model(inputs=inputs, outputs=[embedding, mask])
         return model
 
-    def build_model_chimerapp(self, n_blstm_units=500, n_blstm_layers=4):
+class ChimeraPPModel(ChimeraNetModel):
+
+    def build_model(self, n_blstm_units=500, n_blstm_layers=4):
         inputs = Input(shape=(self.T, self.F), name='input')
         blstm_top = inputs
         for i in range(1, n_blstm_layers+1):
