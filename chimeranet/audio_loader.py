@@ -3,6 +3,7 @@ import os
 import io
 import tarfile
 import zipfile
+import tempfile
 import numpy as np
 import librosa
 import soundfile
@@ -73,56 +74,74 @@ class DirAudioLoader(AudioLoader):
     def __init__(self, path):
         super().__init__()
         self.path = path
-        self.sorted_file_list = sorted(os.listdir(path))
+        ext = set(['aac', 'au', 'flac', 'm4a', 'mp3', 'ogg', 'wav'])
+        self.sorted_file_list = sorted(sum(
+            ([os.path.join(dp, f)
+                for f in fn if os.path.splitext(f)[1][1:] in ext]
+                for dp, dn, fn in os.walk(path)),
+            []
+        ))
     def _load_audio(self, index, sr):
-        y, _ = librosa.core.load(
-            os.path.join(self.path, self.sorted_file_list[index]),
-            sr=sr
-        )
+        y, _ = librosa.core.load(self.sorted_file_list[index], sr=sr)
         return y
     def __len__(self):
         return len(self.sorted_file_list)
 
 class ZipAudioLoader(AudioLoader):
-    def __init__(self, zippath, path):
+    def __init__(self, zippath, path=''):
         super().__init__()
         self.zippath = zippath
         self.path = path
+        ext = set(['aac', 'au', 'flac', 'm4a', 'mp3', 'ogg', 'wav'])
         zf = zipfile.ZipFile(zippath)
-        self.name_list = list(
+        self.name_list = sorted(list(
             i.filename for i in zf.infolist()
             if i.filename.startswith(path) and not i.is_dir()
-        )
+            and os.path.splitext(i.filename)[1][1:] in ext
+        ))
         zf.close()
     def __del__(self):
         super().__del__()
     def _load_audio(self, index, sr):
+        name = self.name_list[index]
+        f = os.path.splitext(name)[1]
         zf = zipfile.ZipFile(self.zippath)
-        b = zf.read(self.name_list[index])
-        data, samplerate = soundfile.read(io.BytesIO(b))
+        with tempfile.TemporaryDirectory() as dirname:
+            ifn = os.path.join(dirname, 'in{}'.format(f))
+            with open(ifn, 'wb') as fp:
+                fp.write(zf.read(name))
+            data, _ = librosa.load(ifn, sr=sr)
         zf.close()
-        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
+        return data
     def __len__(self):
         return len(self.name_list)
 
 class TarAudioLoader(AudioLoader):
-    def __init__(self, tarpath, path):
+    def __init__(self, tarpath, path=''):
         super().__init__()
         self.tarpath = tarpath
         self.path = path
+        ext = set(['aac', 'au', 'flac', 'm4a', 'mp3', 'ogg', 'wav'])
         tf = tarfile.open(tarpath)
-        self.name_list = list(
-            i.name for i in self.tf.getmembers()
+        self.name_list = sorted(list(
+            i.name for i in tf.getmembers()
             if i.name.startswith(path) and i.isfile()
-        )
+            and os.path.splitext(i.name)[1][1:] in ext
+        ))
         tf.close()
     def __del__(self):
         super().__del__()
     def load_audio(self, index, sr):
+        name = self.name_list[index]
+        f = os.path.splitext(name)[1]
         tf = tarfile.open(self.tarpath)
-        with self.tf.extractfile(self.name_list[index]) as f:
-            data, samplerate = soundfile.read(f)
+        with tempfile.TemporaryDirectory() as dirname:
+            ifn = os.path.join(dirname, 'in{}'.format(f))
+            with open(ifn, 'wb') as fp1:
+                with tf.extractfile(name) as fp2:
+                    fp1.write(fp2.read())
+            data, _ = librosa.load(ifn, sr=sr)
         tf.close()
-        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
+        return data
     def __len__(self):
         return len(self.name_list)
