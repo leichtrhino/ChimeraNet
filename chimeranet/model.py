@@ -82,11 +82,11 @@ class ChimeraNetModel:
 
         embd_linear = Dense(self.F*self.D, activation='tanh', name='embedding_linear')(blstm_top)
         embd_reshape = Reshape((self.T, self.F, self.D), name='embedding_reshape')(embd_linear)
-        embedding = Lambda(lambda x: K.l2_normalize(x, axis=-1), name='embedding')(embd_reshape)
+        embedding = Lambda(lambda x: x / K.expand_dims(K.maximum(K.sqrt(K.sum(x**2, axis=-1)), K.epsilon())), name='embedding')(embd_reshape)
 
-        mask_linear = Dense(self.F*self.C, activation='sigmoid', name='mask_linear')(blstm_top)
+        mask_linear = Dense(self.F*self.C, activation='relu', name='mask_linear')(blstm_top)
         mask_reshape = Reshape((self.T, self.F, self.C), name='mask_reshape')(mask_linear)
-        mask = Lambda(lambda x: x / K.sum(x, axis=-1, keepdims=True), name='mask')(mask_reshape)
+        mask = Lambda(lambda x: x / K.expand_dims(K.maximum(K.sum(x, axis=-1), K.epsilon())), name='mask')(mask_reshape)
 
         model = Model(inputs=inputs, outputs=[embedding, mask])
         return model
