@@ -42,12 +42,3 @@ class LMDLoader(AudioLoader):
             data, _ = librosa.load(ofn, sr=sr)
         tf.close()
         return data
-
-class LMDWavLoader(LMDLoader):
-    def load_audio(self, index, sr):
-        name = self.name_list[index]
-        tf = tarfile.open(self.path)
-        with tf.extractfile(name) as f:
-            data, samplerate = soundfile.read(f)
-        tf.close()
-        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
