@@ -2,37 +2,31 @@
 import os
 import io
 import zipfile
+import tempfile
 import librosa
 import soundfile
 
 from ..audio_loader import AudioLoader
 
 class VoxCelebLoader(AudioLoader):
-    def __init__(self, dev_path=None, test_path=None):
+    def __init__(self, path):
         super().__init__()
-        self.dev_path, self.test_path = dev_path, test_path
-        self.name_list = []
-        if dev_path:
-            dev_zf = zipfile.ZipFile(dev_path)
-            self.name_list +=  [
-                (i.filename, 'dev')
-                for i in dev_zf.infolist() if not i.is_dir()
-            ]
-            dev_zf.close()
-        if test_path:
-            test_zf = zipfile.ZipFile(test_path)
-            self.name_list += [
-                (i.filename, 'test')
-                for i in test_zf.infolist() if not i.is_dir()
-            ]
-            test_zf.close()
-    def __del__(self):
-        super().__del__()
-    def _load_audio(self, index, sr):
-        name, arc = self.name_list[index]
-        zf = zipfile.ZipFile(self.dev_path if arc == 'dev' else self.test_path)
-        data, samplerate = soundfile.read(io.BytesIO(zf.read(name)))
+        self.path = path
+        zf = zipfile.ZipFile(path)
+        self.name_list =  [
+            i.filename for i in zf.infolist() if not i.is_dir()
+        ]
         zf.close()
-        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
+    def _load_audio(self, index, sr):
+        name = self.name_list[index]
+        f = os.path.splitext(name)[1][1:]
+        zf = zipfile.ZipFile(self.path)
+        with tempfile.TemporaryDirectory() as dirname:
+            ifn = os.path.join(dirname, 'in.{}'.format(f))
+            with open(ifn, 'wb') as fp:
+                fp.write(zf.read(name))
+            data, _ = librosa.load(ifn, sr=sr)
+        zf.close()
+        return data
     def __len__(self):
         return len(self.name_list)
