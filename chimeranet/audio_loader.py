@@ -31,13 +31,17 @@ class AudioLoader:
             p_index = key
         else:
             raise TypeError(type(key), 'not supported')
-        class _MiniLoader(AudioLoader):
-            def _load_audio(self, index, sr, offset=0, duration=None):
-                return parent._load_audio(
-                    p_index[index], sr, offset=offset, duration=duration)
-            def __len__(self):
-                return len(p_index)
-        return _MiniLoader()
+        return _MiniLoader(self, p_index)
+
+class _MiniLoader(AudioLoader):
+    def __init__(self, parent, p_index):
+        self.parent = parent
+        self.p_index = p_index
+    def _load_audio(self, index, sr, offset=0, duration=None):
+        return self.parent._load_audio(
+            self.p_index[index], sr, offset=offset, duration=duration)
+    def __len__(self):
+        return len(self.p_index)
 
 class FakeAudioLoader(AudioLoader):
     def __init__(self, n_samples, audio_size):
@@ -84,10 +88,10 @@ class DirAudioLoader(AudioLoader):
             []
         ))
     def _load_audio(self, index, sr, offset=0., duration=None):
+        ifn = self.sorted_file_list[index]
         if duration is not None:
             offset *= librosa.core.get_duration(filename=ifn) - duration
-        y, _ = librosa.core.load(
-            self.sorted_file_list[index], sr=sr, offset=offset, duration=duration)
+        y, _ = librosa.core.load(ifn, sr=sr, offset=offset, duration=duration)
         return y
     def __len__(self):
         return len(self.sorted_file_list)
