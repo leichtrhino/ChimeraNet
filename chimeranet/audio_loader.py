@@ -13,9 +13,9 @@ class AudioLoader:
         pass
     def __del__(self):
         pass
-    def load_audio(self, index, sr):
-        return self._load_audio(index, sr)
-    def _load_audio(self, index, sr):
+    def load_audio(self, index, sr, offset=0., duration=None):
+        return self._load_audio(index, sr, offset=offset, duration=duration)
+    def _load_audio(self, index, sr, offset=0., duration=None):
         return None
     def __len__(self):
         return 0
@@ -32,8 +32,9 @@ class AudioLoader:
         else:
             raise TypeError(type(key), 'not supported')
         class _MiniLoader(AudioLoader):
-            def _load_audio(self, index, sr):
-                return parent._load_audio(p_index[index], sr)
+            def _load_audio(self, index, sr, offset=0, duration=None):
+                return parent._load_audio(
+                    p_index[index], sr, offset=offset, duration=duration)
             def __len__(self):
                 return len(p_index)
         return _MiniLoader()
@@ -43,8 +44,8 @@ class FakeAudioLoader(AudioLoader):
         super().__init__()
         self.n_samples = n_samples
         self.audio_size = audio_size
-    def _load_audio(self, index, sr):
-        return np.full(self.audio_size, index)
+    def _load_audio(self, index, sr, offset=0, duration=None):
+        return np.full(self.audio_size, index).astype(float)
     def __len__(self):
         return self.n_samples
 
@@ -53,10 +54,11 @@ class Combiner(AudioLoader):
         super().__init__()
         self.loaders = loaders
         self.idx_to_idx = np.cumsum([len(l) for l in loaders])
-    def _load_audio(self, index, sr):
+    def _load_audio(self, index, sr, offset=0, duration=None):
         idx = np.searchsorted(self.idx_to_idx, index, 'right')
         midx = index - (0 if idx == 0 else self.idx_to_idx[idx-1])
-        return self.loaders[idx].load_audio(midx, sr)
+        return self.loaders[idx].load_audio(
+            midx, sr, offset=offset, duration=duration)
     def __len__(self):
         return self.idx_to_idx[-1]
 
@@ -81,8 +83,11 @@ class DirAudioLoader(AudioLoader):
                 for dp, dn, fn in os.walk(path)),
             []
         ))
-    def _load_audio(self, index, sr):
-        y, _ = librosa.core.load(self.sorted_file_list[index], sr=sr)
+    def _load_audio(self, index, sr, offset=0., duration=None):
+        if duration is not None:
+            offset *= librosa.core.get_duration(filename=ifn) - duration
+        y, _ = librosa.core.load(
+            self.sorted_file_list[index], sr=sr, offset=offset, duration=duration)
         return y
     def __len__(self):
         return len(self.sorted_file_list)
@@ -102,7 +107,7 @@ class ZipAudioLoader(AudioLoader):
         zf.close()
     def __del__(self):
         super().__del__()
-    def _load_audio(self, index, sr):
+    def _load_audio(self, index, sr, offset=0., duration=None):
         name = self.name_list[index]
         f = os.path.splitext(name)[1]
         zf = zipfile.ZipFile(self.zippath)
@@ -110,7 +115,10 @@ class ZipAudioLoader(AudioLoader):
             ifn = os.path.join(dirname, 'in{}'.format(f))
             with open(ifn, 'wb') as fp:
                 fp.write(zf.read(name))
-            data, _ = librosa.load(ifn, sr=sr)
+            if duration is not None:
+                offset *= librosa.core.get_duration(filename=ifn) - duration
+            data, _ = librosa.load(
+                ifn, sr=sr, offset=offset, duration=duration)
         zf.close()
         return data
     def __len__(self):
@@ -131,7 +139,7 @@ class TarAudioLoader(AudioLoader):
         tf.close()
     def __del__(self):
         super().__del__()
-    def load_audio(self, index, sr):
+    def load_audio(self, index, sr, offset=0., duration=None):
         name = self.name_list[index]
         f = os.path.splitext(name)[1]
         tf = tarfile.open(self.tarpath)
@@ -140,7 +148,10 @@ class TarAudioLoader(AudioLoader):
             with open(ifn, 'wb') as fp1:
                 with tf.extractfile(name) as fp2:
                     fp1.write(fp2.read())
-            data, _ = librosa.load(ifn, sr=sr)
+            if duration is not None:
+                offset *= librosa.core.get_duration(filename=ifn) - duration
+            data, _ = librosa.load(
+                ifn, sr=sr, offset=offset, duration=duration)
         tf.close()
         return data
     def __len__(self):

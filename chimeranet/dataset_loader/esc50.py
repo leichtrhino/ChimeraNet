@@ -2,6 +2,7 @@
 import os
 import io
 import zipfile
+import tempfile
 import librosa
 import soundfile
 
@@ -26,12 +27,19 @@ class ESC50Loader(AudioLoader):
         zf.close()
     def __del__(self):
         super().__del__()
-    def _load_audio(self, index, sr):
+    def _load_audio(self, index, sr, offset=0., duration=None):
         zf = zipfile.ZipFile(self.path)
-        b = zf.read('ESC-50-master/audio/'+self.name_list[index])
-        data, samplerate = soundfile.read(io.BytesIO(b))
+        with tempfile.TemporaryDirectory() as dirname:
+            name = 'ESC-50-master/audio/'+self.name_list[index]
+            ifn = os.path.join(dirname, 'in.wav')
+            with open(ifn, 'wb') as fp:
+                fp.write(zf.read(name))
+            if duration is not None:
+                offset *= librosa.core.get_duration(filename=ifn) - duration
+            data, _ = librosa.load(
+                ifn, sr=sr, offset=offset, duration=duration)
         zf.close()
-        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
+        return data
     def __len__(self):
         return len(self.name_list)
     @staticmethod
