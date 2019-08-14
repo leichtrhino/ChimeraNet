@@ -106,26 +106,31 @@ class AudioMixer:
                 for ar in self._audio_readers
             ]).T
         # end function
-
-    def _mod_time(self, audio_list):
+    
+    def _mod_time_params(self):
         if self._sync_time_flag:
             min_time_rate = max(t[0] for t in self._augment_time_list)
             max_time_rate = min(t[1] for t in self._augment_time_list)
             assert min_time_rate <= max_time_rate,\
                 'Invalid time augmentation'
             rates = [2**random.uniform(min_time_rate, max_time_rate)]\
-                * len(audio_list)
-            offsets = [random.uniform(0, 1)] * len(audio_list)
+                * len(self._augment_time_list)
+            offsets = [random.uniform(0, 1)] * len(self._augment_time_list)
         else:
             rates = [
                 2**random.uniform(*t) for t in self._augment_time_list
             ]
             offsets = [random.uniform(0, 1) for _ in self._augment_time_list]
+        return rates, offsets
+
+    def _mod_time(self, audio_list, rates, offsets):
         def mod_single(t):
             a, r, o = t
             n_slice_samples = librosa.core.time_to_samples(
                 self._time_in_sec * r, sr=self._sr
-            ) + self._hop_length
+            ) + librosa.core.frames_to_samples(
+                1, self._hop_length, self._n_fft
+            )
             offset = max(0, int(o * (a.size - n_slice_samples)))
             # slice
             sliced = a if a.size < offset + n_slice_samples\
@@ -135,16 +140,19 @@ class AudioMixer:
             return stretched
         return list(map(mod_single, zip(audio_list, rates, offsets)))
 
-    def _mod_freq(self, audio_list):
+    def _mod_freq_params(self):
         if self._sync_freq_flag:
             min_freq_rate = max(t[0] for t in self._augment_freq_list)
             max_freq_rate = min(t[1] for t in self._augment_freq_list)
             assert min_freq_rate <= max_freq_rate,\
                 'Invalid freq augmentation'
             rates = [random.uniform(min_freq_rate, max_freq_rate)]\
-                * len(audio_list)
+                * len(self._augment_freq_list)
         else:
             rates = [random.uniform(*r) for r in self._augment_freq_list]
+        return rates
+
+    def _mod_freq(self, audio_list, rates):
         bins_per_octave = self.get_number_of_mel_bins() * 8
         def mod_single(t):
             a, r = t
@@ -153,17 +161,20 @@ class AudioMixer:
                 a, self._sr, n_step, bins_per_octave
             )
         return list(map(mod_single, zip(audio_list, rates)))
-    
-    def _mod_amp(self, audio_list):
+
+    def _mod_amp_params(self):
         if self._sync_amp_flag:
             min_amp_rate = max(t[0] for t in self._augment_amp_list)
             max_amp_rate = min(t[1] for t in self._augment_amp_list)
             assert min_amp_rate <= max_amp_rate,\
                 'Invalid freq augmentation'
             rates = [random.uniform(min_amp_rate, max_amp_rate)]\
-                * len(audio_list)
+                * len(self._augment_amp_list)
         else:
             rates = [random.uniform(*r) for r in self._augment_amp_list]
+        return rates
+
+    def _mod_amp(self, audio_list, rates):
         def mod_single(t):
             a, r = t
             S = librosa.core.stft(a, self._n_fft, self._hop_length)
@@ -199,10 +210,23 @@ class AudioMixer:
         return mel_specs
     
     def make_single_specs(self, idx):
+        rate_t, offset_t = self._mod_time_params()
+        rate_f = self._mod_freq_params()
+        rate_a = self._mod_amp_params()
+        base_duration = self._time_in_sec
+        extra_duration = librosa.core.frames_to_time(
+            1, self._sr, self._hop_length, self._n_fft)
         raw_audio_list = [
-            a.load_audio(i, self._sr) for a, i in zip(self._audio_readers, idx)
+            a.load_audio(
+                i, self._sr, offset=o, duration=r*base_duration+extra_duration)
+            for a, i, r, o in zip(self._audio_readers, idx, rate_t, offset_t)
         ]
-        mod = lambda a: self._mod_amp(self._mod_freq(self._mod_time(a)))
+        mod = lambda a:\
+            self._mod_amp(
+                self._mod_freq(
+                    self._mod_time(a, rate_t, offset_t),
+                rate_f),
+            rate_a)
         specs = self._transform_specs(mod(raw_audio_list))
         return specs
 

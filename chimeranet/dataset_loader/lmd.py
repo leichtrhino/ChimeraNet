@@ -24,7 +24,7 @@ class LMDLoader(AudioLoader):
         tf.close()
     def __len__(self):
         return len(self.name_list)
-    def _load_audio(self, index, sr):
+    def _load_audio(self, index, sr, offset=0., duration=None):
         name = self.name_list[index]
         tf = tarfile.open(self.path)
         with tempfile.TemporaryDirectory() as dirname:
@@ -39,15 +39,9 @@ class LMDLoader(AudioLoader):
             assert proc.returncode == 0,\
             'musescore exit with return code {} and stderr:\n{}'\
             .format(proc.returncode, proc.stderr.decode())
-            data, _ = librosa.load(ofn, sr=sr)
+            if duration is not None:
+                offset *= librosa.core.get_duration(filename=ofn) - duration
+            data, _ = librosa.load(
+                ofn, sr=sr, offset=offset, duration=duration)
         tf.close()
         return data
-
-class LMDWavLoader(LMDLoader):
-    def load_audio(self, index, sr):
-        name = self.name_list[index]
-        tf = tarfile.open(self.path)
-        with tf.extractfile(name) as f:
-            data, samplerate = soundfile.read(f)
-        tf.close()
-        return librosa.resample(librosa.to_mono(data.T), samplerate, sr)
