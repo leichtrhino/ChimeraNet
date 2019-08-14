@@ -206,7 +206,7 @@ class AudioMixer:
             return mod_specs
 
         mel_basis = librosa.filters.mel(self._sr, self._n_fft, self._n_mels)
-        mel_specs = [np.dot(mel_basis, s**2) for s in mod_specs]
+        mel_specs = [np.dot(mel_basis, s) for s in mod_specs]
         return mel_specs
     
     def make_single_specs(self, idx):
