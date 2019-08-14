@@ -73,7 +73,7 @@ class ChimeraNetModel:
 
 class ChimeraPPModel(ChimeraNetModel):
 
-    def build_model(self, n_blstm_units=500, n_blstm_layers=4):
+    def build_model(self, n_blstm_units=500, n_blstm_layers=4, use_ibm=False):
         inputs = Input(shape=(self.T, self.F), name='input')
         blstm_top = inputs
         for i in range(1, n_blstm_layers+1):
@@ -86,9 +86,14 @@ class ChimeraPPModel(ChimeraNetModel):
         embd_reshape = Reshape((self.T, self.F, self.D), name='embedding_reshape')(embd_linear)
         embedding = Lambda(lambda x: x / K.expand_dims(K.maximum(K.sqrt(K.sum(x**2, axis=-1)), K.epsilon())), name='embedding')(embd_reshape)
 
-        mask_linear = Dense(self.F*self.C, activation='relu', name='mask_linear')(blstm_top)
-        mask_reshape = Reshape((self.T, self.F, self.C), name='mask_reshape')(mask_linear)
-        mask = Lambda(lambda x: x / K.expand_dims(K.maximum(K.sum(x, axis=-1), K.epsilon())), name='mask')(mask_reshape)
+        if use_ibm:
+            mask_linear = Dense(self.F*self.C, name='mask_linear')(blstm_top)
+            mask_reshape = Reshape((self.T, self.F, self.C), name='mask_reshape')(mask_linear)
+            mask = Activation('softmax', name='mask')(mask_reshape)
+        else:
+            mask_linear = Dense(self.F*self.C, activation='relu', name='mask_linear')(blstm_top)
+            mask_reshape = Reshape((self.T, self.F, self.C), name='mask_reshape')(mask_linear)
+            mask = Lambda(lambda x: x / K.expand_dims(K.maximum(K.sum(x, axis=-1), K.epsilon())), name='mask')(mask_reshape)
 
         model = Model(inputs=inputs, outputs=[embedding, mask])
         return model
