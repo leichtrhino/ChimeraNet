@@ -1,5 +1,6 @@
 
 import numpy as np
+from scipy.special import softmax
 
 """
 input: NxCxFxT tensor
@@ -14,9 +15,10 @@ input: NxCxFxT tensor
 output: 'embedding': NxTxFxC tensor
         'mask': NxTxFx(C+1) tensor
 """
-def to_true_pair(multichannels, use_ibm=False):
+def to_true_pair(multichannels, mask='linear'):
     mixture = np.expand_dims(to_mixture(multichannels), axis=-1)
-    mask_func = _binary_mask if use_ibm else _real_mask
+    mask_func = _binary_mask if mask == 'binary' else\
+        _softmax_mask if mask == 'softmax' else _linear_mask
     return {
         'embedding': _binary_mask(multichannels).transpose((0, 3, 2, 1)),
         'mask': np.concatenate(
@@ -41,9 +43,16 @@ def _binary_mask(multichannels):
 input: NxCxFxT tensor
 output: NxCxFxT tensor
 """
-def _real_mask(multichannels):
+def _linear_mask(multichannels):
     m = multichannels.transpose((0, 3, 2, 1)) # => NxTxFxC
     C = m.shape[-1]
     mixture = np.expand_dims(m.sum(axis=-1), -1) # => NxTxFx1
     masks = np.clip(m / np.maximum(mixture, 1e-32), 0, 1)
     return masks.transpose((0, 3, 2, 1)) # => NxCxFxT
+
+"""
+input: NxCxFxT tensor
+output: NxCxFxT tensor
+"""
+def _softmax_mask(multichannels):
+    return softmax(multichannels, axis=1)
