@@ -1,5 +1,6 @@
 
 import numpy as np
+from scipy.special import softmax
 
 """
 input: NxCxFxT tensor
@@ -14,38 +15,44 @@ input: NxCxFxT tensor
 output: 'embedding': NxTxFxC tensor
         'mask': NxTxFx(C+1) tensor
 """
-def to_true_pair(multichannels):
-    m = multichannels.transpose((0, 3, 2, 1)) # => NxTxFxC
-    C = m.shape[-1]
-    mixture = np.expand_dims(m.sum(axis=-1), -1) # => NxTxFx1
-    e_masks = np.eye(C)[
-        m.reshape((m.size // C, C)).argmax(axis=-1)
-    ].reshape(m.shape) # => NxTxFxC
-    m_masks = np.clip(m / np.maximum(mixture, 1e-32), 0, 1)
+def to_true_pair(multichannels, mask='linear'):
+    mixture = np.expand_dims(to_mixture(multichannels), axis=-1)
+    mask_func = _binary_mask if mask == 'binary' else\
+        _softmax_mask if mask == 'softmax' else _linear_mask
     return {
-        'embedding': e_masks,
-        'mask': np.concatenate((m_masks, mixture), axis=-1)
+        'embedding': _binary_mask(multichannels).transpose((0, 3, 2, 1)),
+        'mask': np.concatenate(
+            (mask_func(multichannels).transpose((0, 3, 2, 1)), mixture),
+            axis=-1
+        )
     }
 
 """
 input: NxCxFxT tensor
-output: NxTxFxC tensor
+output: NxCxFxT tensor
 """
-def to_true_deepclustering(multichannels):
+def _binary_mask(multichannels):
     m = multichannels.transpose((0, 3, 2, 1)) # => NxTxFxC
     C = m.shape[-1]
     masks = np.eye(C)[
         m.reshape((m.size // C, C)).argmax(axis=-1)
     ].reshape(m.shape) # => NxTxFxC
-    return masks
+    return masks.transpose((0, 3, 2, 1)) # => NxCxFxT
 
 """
 input: NxCxFxT tensor
-output: NxTxFx(C+1) tensor
+output: NxCxFxT tensor
 """
-def to_true_mask(multichannels):
+def _linear_mask(multichannels):
     m = multichannels.transpose((0, 3, 2, 1)) # => NxTxFxC
     C = m.shape[-1]
     mixture = np.expand_dims(m.sum(axis=-1), -1) # => NxTxFx1
     masks = np.clip(m / np.maximum(mixture, 1e-32), 0, 1)
-    return np.concatenate((masks, mixture), axis=-1)
+    return masks.transpose((0, 3, 2, 1)) # => NxCxFxT
+
+"""
+input: NxCxFxT tensor
+output: NxCxFxT tensor
+"""
+def _softmax_mask(multichannels):
+    return softmax(multichannels, axis=1)
