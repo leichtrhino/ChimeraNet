@@ -5,7 +5,7 @@ import numpy as np
 import keras.backend as K
 from keras.models import Model
 from keras.layers import Input, Lambda, Reshape, Activation
-from keras.layers import Dense, LSTM, Bidirectional
+from keras.layers import Dense, LSTM, GRU, SimpleRNN, Bidirectional
 
 class ChimeraNetModel:
     """ChimeraNetModel class
@@ -73,7 +73,7 @@ class ChimeraNetModel:
 
 class ChimeraPPModel(ChimeraNetModel):
 
-    def build_model(self, n_blstm_units=500, n_blstm_layers=4, use_ibm=False):
+    def build_model(self, n_blstm_units=500, n_blstm_layers=4, mask='linear'):
         inputs = Input(shape=(self.T, self.F), name='input')
         blstm_top = inputs
         for i in range(1, n_blstm_layers+1):
@@ -86,7 +86,7 @@ class ChimeraPPModel(ChimeraNetModel):
         embd_reshape = Reshape((self.T, self.F, self.D), name='embedding_reshape')(embd_linear)
         embedding = Lambda(lambda x: x / K.expand_dims(K.maximum(K.sqrt(K.sum(x**2, axis=-1)), K.epsilon())), name='embedding')(embd_reshape)
 
-        if use_ibm:
+        if mask == 'softmax':
             mask_linear = Dense(self.F*self.C, name='mask_linear')(blstm_top)
             mask_reshape = Reshape((self.T, self.F, self.C), name='mask_reshape')(mask_linear)
             mask = Activation('softmax', name='mask')(mask_reshape)
