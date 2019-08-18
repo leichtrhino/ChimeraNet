@@ -21,12 +21,17 @@ class ChimeraNetModel:
         def _loss_deepclustering(y_true, y_pred):
             Y = K.reshape(y_true, (-1, self.T*self.F, self.C))
             V = K.reshape(y_pred, (-1, self.T*self.F, self.D))
-            Dmat = K.sum(Y*Y, axis=-1, keepdims=True) ** -0.25
-            DV, DY = Dmat * V, Dmat * Y
+            D = K.expand_dims(K.batch_dot(
+                Y,
+                K.sum(Y, axis=(1,)),
+                axes=(2, 1)
+            ))
+            D = K.switch(D > 0, D**-0.25, K.zeros(K.shape(D)))
+            DV, DY = D * V, D * Y
             a = K.sum(K.batch_dot(DV, DV, axes=(1, 1))**2, axis=(1, 2))
             b = K.sum(K.batch_dot(DV, DY, axes=(1, 1))**2, axis=(1, 2))
             c = K.sum(K.batch_dot(DY, DY, axes=(1, 1))**2, axis=(1, 2))
-            return (a - 2*b + c) / K.cast_to_floatx(self.F*self.T)
+            return (a - 2*b + c)
         return _loss_deepclustering
 
     def loss_mask(self):
