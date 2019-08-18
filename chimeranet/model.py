@@ -73,12 +73,14 @@ class ChimeraNetModel:
 
 class ChimeraPPModel(ChimeraNetModel):
 
-    def build_model(self, n_blstm_units=500, n_blstm_layers=4, mask='linear'):
+    def build_model(self, n_blstm_units=500, n_blstm_layers=4, mask='linear', recurrent_layer='LSTM'):
+        RecurrentLayer = GRU if recurrent_layer == 'GRU' else\
+            SimpleRNN if recurrent_layer == 'RNN' else LSTM
         inputs = Input(shape=(self.T, self.F), name='input')
         blstm_top = inputs
         for i in range(1, n_blstm_layers+1):
             blstm_top = Bidirectional(
-                LSTM(n_blstm_units, return_sequences=True),
+                RecurrentLayer(n_blstm_units, return_sequences=True),
                 name='body_blstm_{}'.format(i)
             )(blstm_top)
 
