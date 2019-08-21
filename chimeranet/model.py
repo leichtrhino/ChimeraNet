@@ -1,11 +1,15 @@
 """model module
 """
 
+import json
 import numpy as np
 import keras.backend as K
 from keras.models import Model
 from keras.layers import Input, Lambda, Reshape, Activation
 from keras.layers import Dense, LSTM, GRU, SimpleRNN, Bidirectional
+from keras.models import load_model
+from keras.utils import CustomObjectScope
+from keras.utils.io_utils import H5Dict
 
 class ChimeraNetModel:
     """ChimeraNetModel class
@@ -74,6 +78,31 @@ class ChimeraNetModel:
         mask = Lambda(lambda x: K.stack(x, axis=2), name='mask')(mask_linears)
     
         model = Model(inputs=inputs, outputs=[embedding, mask])
+        return model
+
+    @staticmethod
+    def probe_model_shape(path):
+        h5dict = H5Dict(path, mode='r')
+
+        layers = json.loads(h5dict['model_config'])['config']['layers']
+        input_layer = next(l for l in layers if l['name'] == 'input')
+        B, T, F = input_layer['config']['batch_input_shape']
+        mask_layer = next(l for l in layers if l['name'] == 'mask_reshape')
+        T_, F_, C = mask_layer['config']['target_shape']
+        embedding_layer = next(l for l in layers if l['name'] == 'embedding_reshape')
+        T__, F__, D = embedding_layer['config']['target_shape']
+
+        h5dict.close()
+        return T, F, C, D
+
+    @staticmethod
+    def load_model(path):
+        cm = ChimeraNetModel(*ChimeraNetModel.probe_model_shape(path))
+        with CustomObjectScope({
+            '_loss_deepclustering': cm.loss_deepclustering(),
+            '_loss_mask': cm.loss_mask(),
+        }):
+            model = load_model(path)
         return model
 
 class ChimeraPPModel(ChimeraNetModel):
