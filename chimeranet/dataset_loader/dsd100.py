@@ -20,7 +20,7 @@ class DSD100Loader(AudioLoader):
         if test:
             prefix_list.append('DSD100/Sources/Test/')
         zf = zipfile.ZipFile(path)
-        self.name_list = list(
+        self.name_list = sorted(
             i.filename for i in zf.infolist()
             if any(
                 i.filename.startswith(prefix)\
