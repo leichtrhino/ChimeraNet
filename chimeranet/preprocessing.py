@@ -15,7 +15,9 @@ input: NxCxFxT tensor
 output: 'embedding': NxTxFxC tensor
         'mask': NxTxFx(C+1) tensor
 """
-def to_true_pair(multichannels, mask='linear', threshold=None):
+def to_true_pair(multichannels, mask='linear', noise=None, threshold=None):
+    if noise:
+        multichannels += np.random.uniform(0, noise, size=multichannels.shape)
     mixture = np.expand_dims(to_mixture(multichannels), axis=-1)
     mask_func = _binary_mask if mask == 'binary' else\
         _softmax_mask if mask == 'softmax' else _linear_mask
