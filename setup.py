@@ -9,7 +9,7 @@ setup(
     author='',
     author_email='',
     url='https://github.com/arity-r/ChimeraNet',
-    packages=['chimeranet'],
+    packages=['chimeranet', 'chimeranet.dataset_loader'],
     python_requires='~=3.6',
     # TODO: specify version
     install_requires=[
@@ -19,8 +19,7 @@ setup(
         'librosa',
         'pysoundfile',
     ],
-    package_dir={'chimeranet': 'chimeranet'},
-    package_data={'chimeranet': ['models/*.hd5']},
+    package_data={'chimeranet': ['models/*.hdf5']},
     scripts=[
         'scripts/chimeranet.py',
         'scripts/chimeranet-prepare.py',
