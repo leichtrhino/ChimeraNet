@@ -20,18 +20,18 @@ chimeranet.dataset\_loader.esc50 module
    :undoc-members:
    :show-inheritance:
 
-chimeranet.dataset\_loader.voxceleb module
-------------------------------------------
+chimeranet.dataset\_loader.lmd module
+-------------------------------------
 
-.. automodule:: chimeranet.dataset_loader.voxceleb
+.. automodule:: chimeranet.dataset_loader.lmd
    :members:
    :undoc-members:
    :show-inheritance:
 
-chimeranet.dataset\_loader.voxceleb2 module
--------------------------------------------
+chimeranet.dataset\_loader.voxceleb module
+------------------------------------------
 
-.. automodule:: chimeranet.dataset_loader.voxceleb2
+.. automodule:: chimeranet.dataset_loader.voxceleb
    :members:
    :undoc-members:
    :show-inheritance:

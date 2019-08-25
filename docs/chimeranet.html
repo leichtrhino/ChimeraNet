@@ -42,8 +42,8 @@
 <li class="toctree-l2"><a class="reference internal" href="chimeranet.dataset_loader.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.dsd100">chimeranet.dataset_loader.dsd100 module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.esc50">chimeranet.dataset_loader.esc50 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.lmd">chimeranet.dataset_loader.lmd module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.voxceleb">chimeranet.dataset_loader.voxceleb module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.voxceleb2">chimeranet.dataset_loader.voxceleb2 module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader">Module contents</a></li>
 </ul>
 </li>
@@ -61,9 +61,15 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="chimeranet.audio_loader.AudioLoader.load_audio">
-<code class="sig-name descname">load_audio</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#AudioLoader.load_audio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.AudioLoader.load_audio" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_audio</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#AudioLoader.load_audio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.AudioLoader.load_audio" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="chimeranet.audio_loader.Combiner">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.audio_loader.</code><code class="sig-name descname">Combiner</code><span class="sig-paren">(</span><em class="sig-param">*loaders</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#Combiner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.Combiner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.audio_loader.AudioLoader" title="chimeranet.audio_loader.AudioLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.audio_loader.AudioLoader</span></code></a></p>
 </dd></dl>
 
 <dl class="class">
@@ -80,20 +86,25 @@
 
 <dl class="class">
 <dt id="chimeranet.audio_loader.TarAudioLoader">
-<em class="property">class </em><code class="sig-prename descclassname">chimeranet.audio_loader.</code><code class="sig-name descname">TarAudioLoader</code><span class="sig-paren">(</span><em class="sig-param">tarpath</em>, <em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#TarAudioLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.TarAudioLoader" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.audio_loader.</code><code class="sig-name descname">TarAudioLoader</code><span class="sig-paren">(</span><em class="sig-param">tarpath</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#TarAudioLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.TarAudioLoader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#chimeranet.audio_loader.AudioLoader" title="chimeranet.audio_loader.AudioLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.audio_loader.AudioLoader</span></code></a></p>
 <dl class="method">
 <dt id="chimeranet.audio_loader.TarAudioLoader.load_audio">
-<code class="sig-name descname">load_audio</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#TarAudioLoader.load_audio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.TarAudioLoader.load_audio" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">load_audio</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#TarAudioLoader.load_audio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.TarAudioLoader.load_audio" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="chimeranet.audio_loader.ZipAudioLoader">
-<em class="property">class </em><code class="sig-prename descclassname">chimeranet.audio_loader.</code><code class="sig-name descname">ZipAudioLoader</code><span class="sig-paren">(</span><em class="sig-param">zippath</em>, <em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#ZipAudioLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.ZipAudioLoader" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.audio_loader.</code><code class="sig-name descname">ZipAudioLoader</code><span class="sig-paren">(</span><em class="sig-param">zippath</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#ZipAudioLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.ZipAudioLoader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#chimeranet.audio_loader.AudioLoader" title="chimeranet.audio_loader.AudioLoader"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.audio_loader.AudioLoader</span></code></a></p>
 </dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.audio_loader.split_loader">
+<code class="sig-prename descclassname">chimeranet.audio_loader.</code><code class="sig-name descname">split_loader</code><span class="sig-paren">(</span><em class="sig-param">loader</em>, <em class="sig-param">weights</em>, <em class="sig-param">shuffle=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/audio_loader.html#split_loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.audio_loader.split_loader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-chimeranet.audio_mixer">
@@ -199,13 +210,34 @@
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="chimeranet.model.ChimeraNetModel.load_model">
+<em class="property">static </em><code class="sig-name descname">load_model</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/model.html#ChimeraNetModel.load_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.model.ChimeraNetModel.load_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="chimeranet.model.ChimeraNetModel.loss_deepclustering">
 <code class="sig-name descname">loss_deepclustering</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/model.html#ChimeraNetModel.loss_deepclustering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.model.ChimeraNetModel.loss_deepclustering" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="chimeranet.model.ChimeraNetModel.loss_mask">
-<code class="sig-name descname">loss_mask</code><span class="sig-paren">(</span><em class="sig-param">scaled=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/model.html#ChimeraNetModel.loss_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.model.ChimeraNetModel.loss_mask" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">loss_mask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/model.html#ChimeraNetModel.loss_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.model.ChimeraNetModel.loss_mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="chimeranet.model.ChimeraNetModel.probe_model_shape">
+<em class="property">static </em><code class="sig-name descname">probe_model_shape</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/model.html#ChimeraNetModel.probe_model_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.model.ChimeraNetModel.probe_model_shape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="chimeranet.model.ChimeraPPModel">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.model.</code><code class="sig-name descname">ChimeraPPModel</code><span class="sig-paren">(</span><em class="sig-param">time_frames</em>, <em class="sig-param">mel_bins</em>, <em class="sig-param">n_channels</em>, <em class="sig-param">d_embeddings</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/model.html#ChimeraPPModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.model.ChimeraPPModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.model.ChimeraNetModel" title="chimeranet.model.ChimeraNetModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.model.ChimeraNetModel</span></code></a></p>
+<dl class="method">
+<dt id="chimeranet.model.ChimeraPPModel.build_model">
+<code class="sig-name descname">build_model</code><span class="sig-paren">(</span><em class="sig-param">n_blstm_units=500</em>, <em class="sig-param">n_blstm_layers=4</em>, <em class="sig-param">mask='linear'</em>, <em class="sig-param">recurrent_layer='LSTM'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/model.html#ChimeraPPModel.build_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.model.ChimeraPPModel.build_model" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -232,18 +264,32 @@
 <dd></dd></dl>
 
 <dl class="function">
-<dt id="chimeranet.preprocessing.to_true_deepclustering">
-<code class="sig-prename descclassname">chimeranet.preprocessing.</code><code class="sig-name descname">to_true_deepclustering</code><span class="sig-paren">(</span><em class="sig-param">multichannels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/preprocessing.html#to_true_deepclustering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.preprocessing.to_true_deepclustering" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="chimeranet.preprocessing.to_true_mask">
-<code class="sig-prename descclassname">chimeranet.preprocessing.</code><code class="sig-name descname">to_true_mask</code><span class="sig-paren">(</span><em class="sig-param">multichannels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/preprocessing.html#to_true_mask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.preprocessing.to_true_mask" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
 <dt id="chimeranet.preprocessing.to_true_pair">
-<code class="sig-prename descclassname">chimeranet.preprocessing.</code><code class="sig-name descname">to_true_pair</code><span class="sig-paren">(</span><em class="sig-param">multichannels</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/preprocessing.html#to_true_pair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.preprocessing.to_true_pair" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">chimeranet.preprocessing.</code><code class="sig-name descname">to_true_pair</code><span class="sig-paren">(</span><em class="sig-param">multichannels</em>, <em class="sig-param">mask='linear'</em>, <em class="sig-param">noise=None</em>, <em class="sig-param">threshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/preprocessing.html#to_true_pair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.preprocessing.to_true_pair" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-chimeranet.restoration">
+<span id="chimeranet-restoration-module"></span><h2>chimeranet.restoration module<a class="headerlink" href="#module-chimeranet.restoration" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="chimeranet.restoration.MaskRestorator">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.restoration.</code><code class="sig-name descname">MaskRestorator</code><a class="reference internal" href="_modules/chimeranet/restoration.html#MaskRestorator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.restoration.MaskRestorator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.restoration.gen_psi">
+<code class="sig-prename descclassname">chimeranet.restoration.</code><code class="sig-name descname">gen_psi</code><span class="sig-paren">(</span><em class="sig-param">K</em>, <em class="sig-param">M</em>, <em class="sig-param">N</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/restoration.html#gen_psi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.restoration.gen_psi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.restoration.idct_mat">
+<code class="sig-prename descclassname">chimeranet.restoration.</code><code class="sig-name descname">idct_mat</code><span class="sig-paren">(</span><em class="sig-param">Q</em>, <em class="sig-param">R</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/restoration.html#idct_mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.restoration.idct_mat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.restoration.mel_mat">
+<code class="sig-prename descclassname">chimeranet.restoration.</code><code class="sig-name descname">mel_mat</code><span class="sig-paren">(</span><em class="sig-param">R</em>, <em class="sig-param">K</em>, <em class="sig-param">sr</em>, <em class="sig-param">fmin=0.0</em>, <em class="sig-param">fmax=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/restoration.html#mel_mat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.restoration.mel_mat" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>

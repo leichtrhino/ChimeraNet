@@ -43,9 +43,11 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#P"><strong>P</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#V"><strong>V</strong></a>
@@ -74,7 +76,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chimeranet.html#chimeranet.model.ChimeraNetModel.build_model">build_model() (chimeranet.model.ChimeraNetModel method)</a>
+
+      <ul>
+        <li><a href="chimeranet.html#chimeranet.model.ChimeraPPModel.build_model">(chimeranet.model.ChimeraPPModel method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -95,11 +101,11 @@
 </li>
       <li><a href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.esc50">chimeranet.dataset_loader.esc50 (module)</a>
 </li>
+      <li><a href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.lmd">chimeranet.dataset_loader.lmd (module)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.voxceleb">chimeranet.dataset_loader.voxceleb (module)</a>
-</li>
-      <li><a href="chimeranet.dataset_loader.html#module-chimeranet.dataset_loader.voxceleb2">chimeranet.dataset_loader.voxceleb2 (module)</a>
 </li>
       <li><a href="chimeranet.html#module-chimeranet.model">chimeranet.model (module)</a>
 </li>
@@ -107,9 +113,15 @@
 </li>
       <li><a href="chimeranet.html#module-chimeranet.preprocessing">chimeranet.preprocessing (module)</a>
 </li>
+      <li><a href="chimeranet.html#module-chimeranet.restoration">chimeranet.restoration (module)</a>
+</li>
       <li><a href="chimeranet.html#module-chimeranet.window_util">chimeranet.window_util (module)</a>
 </li>
       <li><a href="chimeranet.html#chimeranet.model.ChimeraNetModel">ChimeraNetModel (class in chimeranet.model)</a>
+</li>
+      <li><a href="chimeranet.html#chimeranet.model.ChimeraPPModel">ChimeraPPModel (class in chimeranet.model)</a>
+</li>
+      <li><a href="chimeranet.html#chimeranet.audio_loader.Combiner">Combiner (class in chimeranet.audio_loader)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -155,12 +167,14 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.generate_specs">generate_specs() (chimeranet.audio_mixer.AudioMixer method)</a>
+      <li><a href="chimeranet.html#chimeranet.restoration.gen_psi">gen_psi() (in module chimeranet.restoration)</a>
 </li>
-      <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.get_frames">get_frames() (chimeranet.audio_mixer.AudioMixer method)</a>
+      <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.generate_specs">generate_specs() (chimeranet.audio_mixer.AudioMixer method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.get_frames">get_frames() (chimeranet.audio_mixer.AudioMixer method)</a>
+</li>
       <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.get_number_of_channels">get_number_of_channels() (chimeranet.audio_mixer.AudioMixer method)</a>
 </li>
       <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.get_number_of_mel_bins">get_number_of_mel_bins() (chimeranet.audio_mixer.AudioMixer method)</a>
@@ -176,9 +190,19 @@
   </ul></td>
 </tr></table>
 
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chimeranet.html#chimeranet.restoration.idct_mat">idct_mat() (in module chimeranet.restoration)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chimeranet.dataset_loader.html#chimeranet.dataset_loader.lmd.LMDLoader">LMDLoader (class in chimeranet.dataset_loader.lmd)</a>
+</li>
       <li><a href="chimeranet.html#chimeranet.audio_loader.AudioLoader.load_audio">load_audio() (chimeranet.audio_loader.AudioLoader method)</a>
 
       <ul>
@@ -187,6 +211,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chimeranet.html#chimeranet.model.ChimeraNetModel.load_model">load_model() (chimeranet.model.ChimeraNetModel static method)</a>
+</li>
       <li><a href="chimeranet.html#chimeranet.model.ChimeraNetModel.loss_deepclustering">loss_deepclustering() (chimeranet.model.ChimeraNetModel method)</a>
 </li>
       <li><a href="chimeranet.html#chimeranet.model.ChimeraNetModel.loss_mask">loss_mask() (chimeranet.model.ChimeraNetModel method)</a>
@@ -201,9 +227,13 @@
 </li>
       <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.make_single_specs">make_single_specs() (chimeranet.audio_mixer.AudioMixer method)</a>
 </li>
+      <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.make_specs">make_specs() (chimeranet.audio_mixer.AudioMixer method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.make_specs">make_specs() (chimeranet.audio_mixer.AudioMixer method)</a>
+      <li><a href="chimeranet.html#chimeranet.restoration.MaskRestorator">MaskRestorator (class in chimeranet.restoration)</a>
+</li>
+      <li><a href="chimeranet.html#chimeranet.restoration.mel_mat">mel_mat() (in module chimeranet.restoration)</a>
 </li>
       <li><a href="chimeranet.html#chimeranet.window_util.merge_windows_mean">merge_windows_mean() (in module chimeranet.window_util)</a>
 </li>
@@ -224,17 +254,27 @@
   </ul></td>
 </tr></table>
 
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chimeranet.html#chimeranet.model.ChimeraNetModel.probe_model_shape">probe_model_shape() (chimeranet.model.ChimeraNetModel static method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chimeranet.html#chimeranet.audio_loader.split_loader">split_loader() (in module chimeranet.audio_loader)</a>
+</li>
       <li><a href="chimeranet.html#chimeranet.window_util.split_window">split_window() (in module chimeranet.window_util)</a>
 </li>
       <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.sr">sr() (chimeranet.audio_mixer.AudioMixer method)</a>
 </li>
-      <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.sync_amp_flag">sync_amp_flag() (chimeranet.audio_mixer.AudioMixer method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.sync_amp_flag">sync_amp_flag() (chimeranet.audio_mixer.AudioMixer method)</a>
+</li>
       <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.sync_flag">sync_flag() (chimeranet.audio_mixer.AudioMixer method)</a>
 </li>
       <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.sync_freq_flag">sync_freq_flag() (chimeranet.audio_mixer.AudioMixer method)</a>
@@ -251,13 +291,9 @@
 </li>
       <li><a href="chimeranet.html#chimeranet.audio_mixer.AudioMixer.time">time() (chimeranet.audio_mixer.AudioMixer method)</a>
 </li>
-      <li><a href="chimeranet.html#chimeranet.preprocessing.to_mixture">to_mixture() (in module chimeranet.preprocessing)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chimeranet.html#chimeranet.preprocessing.to_true_deepclustering">to_true_deepclustering() (in module chimeranet.preprocessing)</a>
-</li>
-      <li><a href="chimeranet.html#chimeranet.preprocessing.to_true_mask">to_true_mask() (in module chimeranet.preprocessing)</a>
+      <li><a href="chimeranet.html#chimeranet.preprocessing.to_mixture">to_mixture() (in module chimeranet.preprocessing)</a>
 </li>
       <li><a href="chimeranet.html#chimeranet.preprocessing.to_true_pair">to_true_pair() (in module chimeranet.preprocessing)</a>
 </li>
@@ -266,10 +302,6 @@
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="chimeranet.dataset_loader.html#chimeranet.dataset_loader.voxceleb2.VoxCeleb2Loader">VoxCeleb2Loader (class in chimeranet.dataset_loader.voxceleb2)</a>
-</li>
-  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chimeranet.dataset_loader.html#chimeranet.dataset_loader.voxceleb.VoxCelebLoader">VoxCelebLoader (class in chimeranet.dataset_loader.voxceleb)</a>
 </li>

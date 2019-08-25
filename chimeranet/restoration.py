@@ -3,7 +3,7 @@ from itertools import product
 import numpy as np
 import scipy.linalg
 import scipy.signal
-from sklearn.mixture
+import sklearn.mixture
 
 def gen_psi(K, M, N):
     frame_size = 2 * (K-1)

@@ -51,6 +51,14 @@ chimeranet.preprocessing module
    :undoc-members:
    :show-inheritance:
 
+chimeranet.restoration module
+-----------------------------
+
+.. automodule:: chimeranet.restoration
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 chimeranet.window\_util module
 ------------------------------
 

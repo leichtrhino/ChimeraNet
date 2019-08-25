@@ -35,6 +35,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">import</span> <span class="nn">librosa</span>
 <span class="kn">import</span> <span class="nn">soundfile</span>
 
@@ -52,7 +53,7 @@
         <span class="k">if</span> <span class="n">test</span><span class="p">:</span>
             <span class="n">prefix_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;DSD100/Sources/Test/&#39;</span><span class="p">)</span>
         <span class="n">zf</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
             <span class="n">i</span><span class="o">.</span><span class="n">filename</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">zf</span><span class="o">.</span><span class="n">infolist</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
                 <span class="n">i</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>\
@@ -63,19 +64,25 @@
         <span class="n">zf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__del__</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">_load_audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">sr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_load_audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">zf</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">offset_</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inst_list</span><span class="p">:</span>
-            <span class="n">b</span> <span class="o">=</span> <span class="n">zf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">+</span><span class="n">inst</span><span class="o">+</span><span class="s1">&#39;.wav&#39;</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">+</span><span class="n">inst</span><span class="o">+</span><span class="s1">&#39;.wav&#39;</span>
+            <span class="n">data_</span><span class="p">,</span> <span class="n">sr_</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">zf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sample_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="n">sr_</span><span class="p">)</span>
+                <span class="n">sample_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offset</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">data_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">sample_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                <span class="n">data_</span> <span class="o">=</span> <span class="n">data_</span><span class="p">[</span><span class="n">sample_offset</span><span class="p">:</span><span class="n">sample_offset</span><span class="o">+</span><span class="n">sample_size</span><span class="p">]</span>
+            <span class="n">data_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">librosa</span><span class="o">.</span><span class="n">to_mono</span><span class="p">(</span><span class="n">data_</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">sr_</span><span class="p">,</span> <span class="n">sr</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">data</span><span class="p">,</span> <span class="n">samplerate</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data_</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">data_</span><span class="p">,</span> <span class="n">samplerate</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
                 <span class="n">data</span> <span class="o">+=</span> <span class="n">data_</span>
-        <span class="n">data</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inst_list</span><span class="p">)</span>
         <span class="n">zf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">librosa</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">librosa</span><span class="o">.</span><span class="n">to_mono</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">samplerate</span><span class="p">,</span> <span class="n">sr</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inst_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">)</span></div>
 
