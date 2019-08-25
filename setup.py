@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='ChimeraNet',
-    version='0.1',
+    version='1.0',
     description='An implementation of music separation model by Luo et.al.',
     author='',
     author_email='',
