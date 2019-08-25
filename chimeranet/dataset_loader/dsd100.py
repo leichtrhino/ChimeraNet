@@ -34,18 +34,15 @@ class DSD100Loader(AudioLoader):
     def _load_audio(self, index, sr, offset=0., duration=None):
         zf = zipfile.ZipFile(self.path)
         data = None
-        _offset = -1
-        with tempfile.TemporaryDirectory() as dirname:
-            ifn = os.path.join(dirname, 'in.wav')
-            for inst in self.inst_list:
-                name = self.name_list[index]+inst+'.wav'
-                with open(ifn, 'wb') as fp:
-                    fp.write(zf.read(name))
-                if duration is not None and _offset < 0:
-                    _offset = offset * librosa.core.get_duration(filename=ifn)\
-                        - duration
-                data_, _ = librosa.load(
-                    ifn, sr=sr, offset=_offset, duration=duration)
+        offset_ = -1
+        for inst in self.inst_list:
+            name = self.name_list[index]+inst+'.wav'
+            data_, sr_ = soundfile.read(io.BytesIO(zf.read(name)))
+            if duration is not None:
+                sample_size = int(duration * sr_)
+                sample_offset = int(offset * max(data_.shape[0] - sample_size, 0))
+                data_ = data_[sample_offset:sample_offset+sample_size]
+            data_ = librosa.resample(librosa.to_mono(data_.T), sr_, sr)
             if data is None:
                 data = data_
             else:
