@@ -21,7 +21,6 @@ setup(
     ],
     package_data={'chimeranet': ['models/*.hdf5']},
     scripts=[
-        'scripts/chimeranet.py',
         'scripts/chimeranet-prepare.py',
         'scripts/chimeranet-train.py',
         'scripts/chimeranet-separate.py',
