@@ -19,7 +19,7 @@ setup(
         'librosa',
         'pysoundfile',
     ],
-    package_data={'chimeranet': ['models/*.hdf5']},
+    package_data={'chimeranet': ['sample_models/*.hdf5']},
     scripts=[
         'scripts/chimeranet-prepare.py',
         'scripts/chimeranet-train.py',
