@@ -207,48 +207,24 @@ class AggregateSampler(Sampler):
     
     @property
     def amplitude_factor(self):
-        max_min_f, min_max_f = None, None
-        for s in self.samplers:
-            min_f, max_f = s.amplitude_factor
-            if max_min_f is None or max_min_f < min_f:
-                max_min_f = min_f
-            if min_max_f is None or min_max_f > max_f:
-                min_max_f = max_f
-        return (max_min_f, min_max_f)
+        return None
     @amplitude_factor.setter
     def amplitude_factor(self, value):
-        for s in self.samplers:
-            s.amplitude_factor = value
+        pass
 
     @property
     def stretch_factor(self):
-        max_min_f, min_max_f = None, None
-        for s in self.samplers:
-            min_f, max_f = s.stretch_factor
-            if max_min_f is None or max_min_f < min_f:
-                max_min_f = min_f
-            if min_max_f is None or min_max_f > max_f:
-                min_max_f = max_f
-        return (max_min_f, min_max_f)
+        return None
     @stretch_factor.setter
     def stretch_factor(self, value):
-        for s in self.samplers:
-            s.stretch_factor = value
+        pass
 
     @property
     def shift_factor(self):
-        max_min_f, min_max_f = None, None
-        for s in self.samplers:
-            min_f, max_f = s.shift_factor
-            if max_min_f is None or max_min_f < min_f:
-                max_min_f = min_f
-            if min_max_f is None or min_max_f > max_f:
-                min_max_f = max_f
-        return (max_min_f, min_max_f)
+        return None
     @shift_factor.setter
     def shift_factor(self, value):
-        for s in self.samplers:
-            s.shift_factor = value
+        pass
     
     def __getitem__(self, key):
         return self.samplers[key]
