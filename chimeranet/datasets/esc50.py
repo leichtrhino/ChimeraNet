@@ -20,7 +20,7 @@ def categories_of(major_categories):
     return sum((categories[c] for c in major_categories), [])
 
 def all_categories():
-    return categories_of(ESC50Loader.major_categories())
+    return categories_of(major_categories())
 
 class ESC50(Dataset):
     def __init__(self, path, category_list, fold=(1, 2, 3, 4)):
