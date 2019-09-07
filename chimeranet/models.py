@@ -14,13 +14,13 @@ def loss_deepclustering(T, F, C, D):
     def _loss_deepclustering(y_true, y_pred):
         Y = K.reshape(y_true, (-1, T*F, C))
         V = K.reshape(y_pred, (-1, T*F, D))
-        D = K.expand_dims(K.batch_dot(
+        Dm = K.expand_dims(K.batch_dot(
             Y,
             K.sum(Y, axis=(1,)),
             axes=(2, 1)
         ))
-        D = K.switch(D > 0, D**-0.25, K.zeros(K.shape(D)))
-        DV, DY = D * V, D * Y
+        Dm = K.switch(Dm > 0, Dm**-0.25, K.zeros(K.shape(Dm)))
+        DV, DY = Dm * V, Dm * Y
         a = K.sum(K.batch_dot(DV, DV, axes=(1, 1))**2, axis=(1, 2))
         b = K.sum(K.batch_dot(DV, DY, axes=(1, 1))**2, axis=(1, 2))
         c = K.sum(K.batch_dot(DY, DY, axes=(1, 1))**2, axis=(1, 2))
