@@ -150,7 +150,7 @@ class DatasetSampler(Sampler):
         m = self.dataset_size()
 
         # generate random index
-        idx = np.arange(n_samples)
+        idx = np.arange(m)
         np.random.shuffle(idx)
         idx = np.hstack((
             np.arange(m).repeat(int(math.ceil(n_samples // m))).flatten(),
@@ -230,6 +230,8 @@ class AggregateSampler(Sampler):
         return self.samplers[key]
 
 class AsyncSampler(AggregateSampler):
+    def dataset_size(self):
+        return max(s.dataset_size() for s in self.samplers)
     def sample(self, n_samples=1, n_jobs=1):
         return np.hstack([s.sample(n_samples, n_jobs) for s in self.samplers])
 
@@ -261,7 +263,7 @@ class SyncSampler(AggregateSampler):
         m = self.dataset_size()
 
         # generate random index
-        idx = np.arange(n_samples)
+        idx = np.arange(m)
         np.random.shuffle(idx)
         idx = np.hstack((
             np.arange(m).repeat(int(math.ceil(n_samples // m))).flatten(),
