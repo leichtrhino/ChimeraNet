@@ -9,7 +9,7 @@ import librosa
 from .datasets import Dataset
 
 def normalise_amplitude(y, amplitude_factor):
-    return 2**(amplitude_factor-1) * y / max(np.max(y), 1e-16)
+    return 2**(amplitude_factor-1) * y / max(np.max(np.abs(y)), 1e-16)
 
 def pitch_shift(y, shift_factor, sr):
     bins_per_octave = 12
