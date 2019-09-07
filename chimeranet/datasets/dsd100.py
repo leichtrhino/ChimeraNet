@@ -1,17 +1,13 @@
 
-import os
 import io
 import zipfile
-import tempfile
-import librosa
-import soundfile
+import numpy as np
 
-from ..audio_loader import AudioLoader
+from .base import Dataset, load
 
-class DSD100Loader(AudioLoader):
+class DSD100(Dataset):
     # inst_list contains ('bass', 'drums', 'other', 'vocals')
     def __init__(self, path, inst_list, dev=True, test=False):
-        super().__init__()
         self.path = path
         self.inst_list = inst_list
         prefix_list = []
@@ -29,34 +25,23 @@ class DSD100Loader(AudioLoader):
             )
         )
         zf.close()
-    def __del__(self):
-        super().__del__()
-    def _load_audio(self, index, sr, offset=0., duration=None):
+    def load(self, index, sr, offset=0., duration=None):
         zf = zipfile.ZipFile(self.path)
-        data = None
-        offset_ = -1
-        for inst in self.inst_list:
-            name = self.name_list[index]+inst+'.wav'
-            data_, sr_ = soundfile.read(io.BytesIO(zf.read(name)))
-            if duration is not None:
-                sample_size = int(duration * sr_)
-                sample_offset = int(offset * max(data_.shape[0] - sample_size, 0))
-                data_ = data_[sample_offset:sample_offset+sample_size]
-            data_ = librosa.resample(librosa.to_mono(data_.T), sr_, sr)
-            if data is None:
-                data = data_
-            else:
-                data += data_
+        y = np.array([
+            load(
+                io.BytesIO(zf.read(self.name_list[index]+inst+'.wav')),
+                sr, offset, duration
+            ) for inst in self.inst_list
+        ]).mean(axis=0)
         zf.close()
-        data /= len(self.inst_list)
-        return data
+        return y
     def __len__(self):
         return len(self.name_list)
 
-class DSD100MelodyLoader(DSD100Loader):
+class DSD100Melody(DSD100):
     def __init__(self, path, dev=True, test=False):
         super().__init__(path, ['bass', 'drums', 'other'], dev, test)
 
-class DSD100VocalLoader(DSD100Loader):
+class DSD100Vocal(DSD100):
     def __init__(self, path, dev=True, test=False):
         super().__init__(path, ['vocals'], dev, test)
