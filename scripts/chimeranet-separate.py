@@ -16,13 +16,13 @@ def main():
     if not importlib.util.find_spec('chimeranet'):
         print('ChimeraNet is not installed, import from source.')
         sys.path.append(os.path.join(os.path.split(__file__)[0], '..'))
-    from chimeranet.model import ChimeraNetModel
+    from chimeranet.models import load_model
 
     args.n_frames, args.n_mels, args.n_channels, args.d_embedding\
         = ChimeraNetModel.probe_model_shape(args.model_path)
     if len(args.channel_name) < args.n_channels:
         raise ValueError # short channel names.
-    args.model = ChimeraNetModel.load_model(args.model_path)
+    args.model = load_model(args.model_path)
     if 0 < args.n_mels < args.n_fft // 2 + 1:
         args.mel_basis = librosa.filters.mel(
             args.sr, args.n_fft, args.n_mels, norm=None
@@ -34,9 +34,9 @@ def main():
 def part(input_path, **kwargs):
     print('processing {}'.format(input_path))
 
-    from chimeranet.postprocessing import from_embedding, from_mask
-    from chimeranet.window_util\
-        import split_window, merge_windows_mean, merge_windows_most_common
+    from chimeranet import from_embedding, from_mask
+    from chimeranet import split_window
+    from chimeranet import merge_windows_mean, merge_windows_most_common
     if kwargs['plot_spectrograms']:
         import matplotlib.pyplot as plt
 
@@ -292,7 +292,7 @@ def parse_args():
     args.output_audio_mapper = output_audio_mapper
 
     if args.plot_spectrograms:
-        if not importlib.util.find_spec('chimeranet'):
+        if not importlib.util.find_spec('matplotlib'):
             parser.error(
                 '"--plot-spectrogram": matplotlib is not installed.'
             )
