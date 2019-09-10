@@ -16,10 +16,10 @@ def main():
     if not importlib.util.find_spec('chimeranet'):
         print('ChimeraNet is not installed, import from source.')
         sys.path.append(os.path.join(os.path.split(__file__)[0], '..'))
-    from chimeranet.models import load_model
+    from chimeranet.models import probe_model_shape, load_model
 
     args.n_frames, args.n_mels, args.n_channels, args.d_embedding\
-        = ChimeraNetModel.probe_model_shape(args.model_path)
+        = probe_model_shape(args.model_path)
     if len(args.channel_name) < args.n_channels:
         raise ValueError # short channel names.
     args.model = load_model(args.model_path)
@@ -48,8 +48,7 @@ def part(input_path, **kwargs):
     )
     if 0 < kwargs['n_mels'] < kwargs['n_fft'] // 2 + 1:
         spec = np.dot(kwargs['mel_basis'], spec)
-    norm_spec = normalize_spec(spec)
-    x = split_window(norm_spec, kwargs['n_frames']).transpose((0, 2, 1))
+    x = split_window(spec, kwargs['n_frames']).transpose((0, 2, 1))
 
     # load actual model and predict
     embedding, mask = kwargs['model'].predict(x)
@@ -146,13 +145,6 @@ def save_audio(input_path, mask, spec, phase, **kwargs):
     if os.path.isdir(output_audio_dir):
         out_audio = librosa.core.istft(pred_spec*phase, kwargs['hop_length'])
         librosa.output.write_wav(output_audio_path, out_audio, kwargs['sr'])
-
-def normalize_spec(spec):
-    s = spec**2
-    s = 100 * (s - np.min(s, 0))\
-        / np.maximum(np.max(s, 0) - np.min(s, 0), 1e-32)
-    s = s**0.5
-    return s
 
 def parse_args():
     parser = ArgumentParser()
