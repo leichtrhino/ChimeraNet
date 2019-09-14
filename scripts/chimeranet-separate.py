@@ -235,12 +235,12 @@ def parse_args():
     if not args.duration:
         args.duration = None
     args.inference_name = [
+        args.mask_inference_name,
         args.embedding_inference_name,
-        args.mask_inference_name
     ]
-    if args.disable_mask_output:
-        args.inference_names.pop(1)
     if args.disable_embedding_inference:
+        args.inference_names.pop(1)
+    if args.disable_mask_output:
         args.inference_names.pop(0)
     args.n_inference = len(args.inference_name)
     if args.channel_name is None:
