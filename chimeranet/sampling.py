@@ -236,6 +236,57 @@ class AsyncSampler(AggregateSampler):
         return np.hstack([s.sample(n_samples, n_jobs) for s in self.samplers])
 
 class SyncSampler(AggregateSampler):
+    @property
+    def amplitude_factor(self):
+        i = iter(self.samplers)
+        min_factor, max_factor = next(i).amplitude_factor
+        for s in i:
+            f = s.amplitude_factor
+            if min_factor < f[0]:
+                min_factor = f[0]
+            if max_factor > f[1]:
+                max_factor = f[1]
+        if min_factor > max_factor:
+            raise RuntimeError('no overlap among sub-samplers')
+        return min_factor, max_factor
+    @amplitude_factor.setter
+    def amplitude_factor(self, value):
+        pass
+
+    @property
+    def stretch_factor(self):
+        i = iter(self.samplers)
+        min_factor, max_factor = next(i).stretch_factor
+        for s in i:
+            f = s.stretch_factor
+            if min_factor < f[0]:
+                min_factor = f[0]
+            if max_factor > f[1]:
+                max_factor = f[1]
+        if min_factor > max_factor:
+            raise RuntimeError('no overlap among sub-samplers')
+        return min_factor, max_factor
+    @stretch_factor.setter
+    def stretch_factor(self, value):
+        pass
+
+    @property
+    def shift_factor(self):
+        i = iter(self.samplers)
+        min_factor, max_factor = next(i).shift_factor
+        for s in i:
+            f = s.shift_factor
+            if min_factor < f[0]:
+                min_factor = f[0]
+            if max_factor > f[1]:
+                max_factor = f[1]
+        if min_factor > max_factor:
+            raise RuntimeError('no overlap among sub-samplers')
+        return min_factor, max_factor
+    @shift_factor.setter
+    def shift_factor(self, value):
+        pass
+
     def load(self, index, **kwargs):
         offset = kwargs.get('offset', random.uniform(0, 1))
         amplitude_factor = kwargs.get(
