@@ -16,7 +16,7 @@ def _to_training_data_single(args):
         )
     C = len(cs)
     m = sum(c*np.max(c) for c in cs)\
-        / max(sum(np.max(c) for c in cs), 1e-16)
+        / max(sum(np.max(np.abs(c)) for c in cs), 1e-16)
     mixture = to_feature(m)[:, :T]
     channels = np.array([to_feature(c) for c in cs])[:, :, :T]
     if noise:
