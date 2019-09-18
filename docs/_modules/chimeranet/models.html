@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>chimeranet.models &#8212; ChimeraNet  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for chimeranet.models</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;model module</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">keras.backend</span> <span class="k">as</span> <span class="nn">K</span>
+<span class="kn">import</span> <span class="nn">keras.models</span>
+<span class="kn">from</span> <span class="nn">keras.models</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="n">Reshape</span><span class="p">,</span> <span class="n">Activation</span>
+<span class="kn">from</span> <span class="nn">keras.layers</span> <span class="k">import</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">LSTM</span><span class="p">,</span> <span class="n">Bidirectional</span>
+<span class="kn">from</span> <span class="nn">keras.utils</span> <span class="k">import</span> <span class="n">CustomObjectScope</span>
+<span class="kn">from</span> <span class="nn">keras.utils.io_utils</span> <span class="k">import</span> <span class="n">H5Dict</span>
+
+<div class="viewcode-block" id="loss_deepclustering"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.loss_deepclustering">[docs]</a><span class="k">def</span> <span class="nf">loss_deepclustering</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_loss_deepclustering</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="o">*</span><span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">))</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="o">*</span><span class="n">F</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+        <span class="n">Dm</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">batch_dot</span><span class="p">(</span>
+            <span class="n">Y</span><span class="p">,</span>
+            <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">))</span>
+        <span class="n">Dm</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">switch</span><span class="p">(</span><span class="n">Dm</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Dm</span><span class="o">**-</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">K</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">Dm</span><span class="p">)))</span>
+        <span class="n">DV</span><span class="p">,</span> <span class="n">DY</span> <span class="o">=</span> <span class="n">Dm</span> <span class="o">*</span> <span class="n">V</span><span class="p">,</span> <span class="n">Dm</span> <span class="o">*</span> <span class="n">Y</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">batch_dot</span><span class="p">(</span><span class="n">DV</span><span class="p">,</span> <span class="n">DV</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">batch_dot</span><span class="p">(</span><span class="n">DV</span><span class="p">,</span> <span class="n">DY</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">batch_dot</span><span class="p">(</span><span class="n">DY</span><span class="p">,</span> <span class="n">DY</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">b</span> <span class="o">+</span> <span class="n">c</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_loss_deepclustering</span></div>
+
+<div class="viewcode-block" id="loss_mask"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.loss_mask">[docs]</a><span class="k">def</span> <span class="nf">loss_mask</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_loss_mask</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
+        <span class="n">mixture</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">y_true</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">C</span><span class="p">])</span>
+        <span class="n">mask_true</span> <span class="o">=</span> <span class="n">y_true</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">C</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">K</span><span class="o">.</span><span class="n">pow</span><span class="p">((</span><span class="n">mask_true</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">)</span><span class="o">*</span><span class="n">mixture</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">_loss_mask</span></div>
+
+<div class="viewcode-block" id="build_chimeranet_model"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.build_chimeranet_model">[docs]</a><span class="k">def</span> <span class="nf">build_chimeranet_model</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">n_blstm_units</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_blstm_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;input&#39;</span><span class="p">)</span>
+    <span class="n">blstm_top</span> <span class="o">=</span> <span class="n">inputs</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_blstm_layers</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">blstm_top</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span>
+            <span class="n">LSTM</span><span class="p">(</span><span class="n">n_blstm_units</span><span class="p">,</span> <span class="n">return_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;body_blstm_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="p">)(</span><span class="n">blstm_top</span><span class="p">)</span>
+    <span class="n">body_linear</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">F</span><span class="o">*</span><span class="n">D</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;body_linear&#39;</span><span class="p">)(</span><span class="n">blstm_top</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">Reshape</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">D</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;body&#39;</span><span class="p">)(</span><span class="n">body_linear</span><span class="p">)</span>
+
+    <span class="n">embd_activation</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;embedding_activation&#39;</span><span class="p">)(</span><span class="n">body</span><span class="p">)</span>
+    <span class="n">embedding</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">l2_normalize</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;embedding&#39;</span>
+    <span class="p">)(</span><span class="n">embd_activation</span><span class="p">)</span>
+    <span class="n">mask_slices</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Lambda</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">f</span><span class="p">,</span> <span class="p">:],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mask_slice_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)(</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">mask_linears</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Dense</span><span class="p">(</span>
+            <span class="n">C</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mask_linear_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)(</span><span class="n">mask_slices</span><span class="p">[</span><span class="n">f</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">F</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mask&#39;</span><span class="p">)(</span><span class="n">mask_linears</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">embedding</span><span class="p">,</span> <span class="n">mask</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="build_chimerapp_model"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.build_chimerapp_model">[docs]</a><span class="k">def</span> <span class="nf">build_chimerapp_model</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">n_blstm_units</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_blstm_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;input&#39;</span><span class="p">)</span>
+    <span class="n">blstm_top</span> <span class="o">=</span> <span class="n">inputs</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_blstm_layers</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">blstm_top</span> <span class="o">=</span> <span class="n">Bidirectional</span><span class="p">(</span>
+            <span class="n">LSTM</span><span class="p">(</span><span class="n">n_blstm_units</span><span class="p">,</span> <span class="n">return_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;body_blstm_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="p">)(</span><span class="n">blstm_top</span><span class="p">)</span>
+
+    <span class="n">embd_linear</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span>
+        <span class="n">F</span><span class="o">*</span><span class="n">D</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;embedding_linear&#39;</span>
+    <span class="p">)(</span><span class="n">blstm_top</span><span class="p">)</span>
+    <span class="n">embd_reshape</span> <span class="o">=</span> <span class="n">Reshape</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">D</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;embedding_reshape&#39;</span>
+    <span class="p">)(</span><span class="n">embd_linear</span><span class="p">)</span>
+    <span class="n">embedding</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">/</span> <span class="n">K</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
+            <span class="n">K</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">K</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">K</span><span class="o">.</span><span class="n">epsilon</span><span class="p">())</span>
+        <span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;embedding&#39;</span>
+    <span class="p">)(</span><span class="n">embd_reshape</span><span class="p">)</span>
+
+    <span class="n">mask_linear</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">F</span><span class="o">*</span><span class="n">C</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mask_linear&#39;</span><span class="p">)(</span><span class="n">blstm_top</span><span class="p">)</span>
+    <span class="n">mask_reshape</span> <span class="o">=</span> <span class="n">Reshape</span><span class="p">((</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mask_reshape&#39;</span><span class="p">)(</span><span class="n">mask_linear</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;softmax&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;mask&#39;</span><span class="p">)(</span><span class="n">mask_reshape</span><span class="p">)</span>
+        
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="p">[</span><span class="n">embedding</span><span class="p">,</span> <span class="n">mask</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="probe_model_shape"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.probe_model_shape">[docs]</a><span class="k">def</span> <span class="nf">probe_model_shape</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="n">h5dict</span> <span class="o">=</span> <span class="n">H5Dict</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="n">layers</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">h5dict</span><span class="p">[</span><span class="s1">&#39;model_config&#39;</span><span class="p">])[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span>
+    <span class="n">input_layer</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">layers</span> <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;input&#39;</span><span class="p">)</span>
+    <span class="n">B</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span> <span class="o">=</span> <span class="n">input_layer</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;batch_input_shape&#39;</span><span class="p">]</span>
+    <span class="n">mask_layer</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">layers</span> <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;mask_reshape&#39;</span><span class="p">)</span>
+    <span class="n">T_</span><span class="p">,</span> <span class="n">F_</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">mask_layer</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;target_shape&#39;</span><span class="p">]</span>
+    <span class="n">embedding_layer</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">layers</span> <span class="k">if</span> <span class="n">l</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;embedding_reshape&#39;</span><span class="p">)</span>
+    <span class="n">T__</span><span class="p">,</span> <span class="n">F__</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">embedding_layer</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">][</span><span class="s1">&#39;target_shape&#39;</span><span class="p">]</span>
+
+    <span class="n">h5dict</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span></div>
+
+<div class="viewcode-block" id="load_model"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.load_model">[docs]</a><span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">probe_model_shape</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">CustomObjectScope</span><span class="p">({</span>
+        <span class="s1">&#39;_loss_deepclustering&#39;</span><span class="p">:</span> <span class="n">loss_deepclustering</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">),</span>
+        <span class="s1">&#39;_loss_mask&#39;</span><span class="p">:</span> <span class="n">loss_mask</span><span class="p">(</span><span class="o">*</span><span class="n">shape</span><span class="p">),</span>
+    <span class="p">}):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="to_prediction_data"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.to_prediction_data">[docs]</a><span class="k">def</span> <span class="nf">to_prediction_data</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="from_predicted_embedding"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.from_predicted_embedding">[docs]</a><span class="k">def</span> <span class="nf">from_predicted_embedding</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="from_predicted_mask"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.from_predicted_mask">[docs]</a><span class="k">def</span> <span class="nf">from_predicted_mask</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ChimeraNetModel"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.ChimeraNetModel">[docs]</a><span class="k">class</span> <span class="nc">ChimeraNetModel</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;ChimeraNetModel class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_frames</span><span class="p">,</span> <span class="n">mel_bins</span><span class="p">,</span> <span class="n">n_channels</span><span class="p">,</span> <span class="n">d_embeddings</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">T</span> <span class="o">=</span> <span class="n">time_frames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">F</span> <span class="o">=</span> <span class="n">mel_bins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">C</span> <span class="o">=</span> <span class="n">n_channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">d_embeddings</span>
+<div class="viewcode-block" id="ChimeraNetModel.loss_deepclustering"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.ChimeraNetModel.loss_deepclustering">[docs]</a>    <span class="k">def</span> <span class="nf">loss_deepclustering</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">loss_deepclustering</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ChimeraNetModel.loss_mask"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.ChimeraNetModel.loss_mask">[docs]</a>    <span class="k">def</span> <span class="nf">loss_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">loss_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ChimeraNetModel.build_model"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.ChimeraNetModel.build_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_blstm_units</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_blstm_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">build_chimeranet_model</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="n">n_blstm_units</span><span class="p">,</span> <span class="n">n_blstm_layers</span>
+        <span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="ChimeraPPModel"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.ChimeraPPModel">[docs]</a><span class="k">class</span> <span class="nc">ChimeraPPModel</span><span class="p">(</span><span class="n">ChimeraNetModel</span><span class="p">):</span>
+<div class="viewcode-block" id="ChimeraPPModel.build_model"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.models.ChimeraPPModel.build_model">[docs]</a>    <span class="k">def</span> <span class="nf">build_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_blstm_units</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">n_blstm_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">build_chimerapp_model</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">F</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">,</span> <span class="n">n_blstm_units</span><span class="p">,</span> <span class="n">n_blstm_layers</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">ChimeraNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">chimeranet</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, arity-r.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

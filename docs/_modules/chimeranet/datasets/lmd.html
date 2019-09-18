@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>chimeranet.dataset_loader.lmd &#8212; ChimeraNet  documentation</title>
+    <title>chimeranet.datasets.lmd &#8212; ChimeraNet  documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -30,34 +30,35 @@
 
           <div class="body" role="main">
             
-  <h1>Source code for chimeranet.dataset_loader.lmd</h1><div class="highlight"><pre>
+  <h1>Source code for chimeranet.datasets.lmd</h1><div class="highlight"><pre>
 <span></span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">import</span> <span class="nn">librosa</span>
-<span class="kn">import</span> <span class="nn">soundfile</span>
 <span class="kn">import</span> <span class="nn">subprocess</span>
 
-<span class="kn">from</span> <span class="nn">..audio_loader</span> <span class="k">import</span> <span class="n">AudioLoader</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
 
-<div class="viewcode-block" id="LMDLoader"><a class="viewcode-back" href="../../../chimeranet.dataset_loader.html#chimeranet.dataset_loader.lmd.LMDLoader">[docs]</a><span class="k">class</span> <span class="nc">LMDLoader</span><span class="p">(</span><span class="n">AudioLoader</span><span class="p">):</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">load</span>
+
+<div class="viewcode-block" id="LMD"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.lmd.LMD">[docs]</a><span class="k">class</span> <span class="nc">LMD</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="c1"># fold = &#39;def&#39; to validation fold</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s1">&#39;lmd_full&#39;</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="s1">&#39;0123456789abc&#39;</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
         <span class="n">tf</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name_list</span> <span class="o">=</span>  <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name_list</span> <span class="o">=</span>  <span class="nb">sorted</span><span class="p">([</span>
             <span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">getmembers</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">isfile</span><span class="p">()</span> <span class="ow">and</span>\
                 <span class="nb">any</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">fold</span><span class="p">)</span>
-        <span class="p">]</span>
+        <span class="p">])</span>
         <span class="n">tf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">_load_audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="LMD.load"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.lmd.LMD.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
         <span class="n">tf</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">dirname</span><span class="p">:</span>
@@ -72,12 +73,9 @@
             <span class="k">assert</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>\
             <span class="s1">&#39;musescore exit with return code </span><span class="si">{}</span><span class="s1"> and stderr:</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span>\
             <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-            <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">offset</span> <span class="o">*=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">get_duration</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">ofn</span><span class="p">)</span> <span class="o">-</span> <span class="n">duration</span>
-            <span class="n">data</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
-                <span class="n">ofn</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">ofn</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
         <span class="n">tf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">data</span></div>
+        <span class="k">return</span> <span class="n">data</span></div></div>
 </pre></div>
 
           </div>
