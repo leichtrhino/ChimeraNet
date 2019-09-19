@@ -4,27 +4,28 @@ import io
 import tarfile
 import tempfile
 import librosa
-import soundfile
 import subprocess
 
-from ..audio_loader import AudioLoader
+import io
+import zipfile
 
-class LMDLoader(AudioLoader):
+from .base import Dataset, load
+
+class LMD(Dataset):
     # fold = 'def' to validation fold
     def __init__(self, path=None, root='lmd_full', fold='0123456789abc'):
-        super().__init__()
         self.root = root
         self.path = path
         tf = tarfile.open(path)
-        self.name_list =  [
+        self.name_list =  sorted([
             i.name for i in tf.getmembers()
             if i.isfile() and\
                 any(i.name.startswith('{}/{}/'.format(root, p)) for p in fold)
-        ]
+        ])
         tf.close()
     def __len__(self):
         return len(self.name_list)
-    def _load_audio(self, index, sr, offset=0., duration=None):
+    def load(self, index, sr, offset=0., duration=None):
         name = self.name_list[index]
         tf = tarfile.open(self.path)
         with tempfile.TemporaryDirectory() as dirname:
@@ -39,9 +40,6 @@ class LMDLoader(AudioLoader):
             assert proc.returncode == 0,\
             'musescore exit with return code {} and stderr:\n{}'\
             .format(proc.returncode, proc.stderr.decode())
-            if duration is not None:
-                offset *= librosa.core.get_duration(filename=ofn) - duration
-            data, _ = librosa.load(
-                ofn, sr=sr, offset=offset, duration=duration)
+            data = load(ofn, sr, offset, duration)
         tf.close()
         return data

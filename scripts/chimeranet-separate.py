@@ -16,13 +16,13 @@ def main():
     if not importlib.util.find_spec('chimeranet'):
         print('ChimeraNet is not installed, import from source.')
         sys.path.append(os.path.join(os.path.split(__file__)[0], '..'))
-    from chimeranet.model import ChimeraNetModel
+    from chimeranet.models import probe_model_shape, load_model
 
     args.n_frames, args.n_mels, args.n_channels, args.d_embedding\
-        = ChimeraNetModel.probe_model_shape(args.model_path)
+        = probe_model_shape(args.model_path)
     if len(args.channel_name) < args.n_channels:
         raise ValueError # short channel names.
-    args.model = ChimeraNetModel.load_model(args.model_path)
+    args.model = load_model(args.model_path)
     if 0 < args.n_mels < args.n_fft // 2 + 1:
         args.mel_basis = librosa.filters.mel(
             args.sr, args.n_fft, args.n_mels, norm=None
@@ -34,9 +34,9 @@ def main():
 def part(input_path, **kwargs):
     print('processing {}'.format(input_path))
 
-    from chimeranet.postprocessing import from_embedding, from_mask
-    from chimeranet.window_util\
-        import split_window, merge_windows_mean, merge_windows_most_common
+    from chimeranet import from_embedding, from_mask
+    from chimeranet import split_window
+    from chimeranet import merge_windows_mean, merge_windows_most_common
     if kwargs['plot_spectrograms']:
         import matplotlib.pyplot as plt
 
@@ -48,8 +48,7 @@ def part(input_path, **kwargs):
     )
     if 0 < kwargs['n_mels'] < kwargs['n_fft'] // 2 + 1:
         spec = np.dot(kwargs['mel_basis'], spec)
-    norm_spec = normalize_spec(spec)
-    x = split_window(norm_spec, kwargs['n_frames']).transpose((0, 2, 1))
+    x = split_window(spec, kwargs['n_frames']).transpose((0, 2, 1))
 
     # load actual model and predict
     embedding, mask = kwargs['model'].predict(x)
@@ -147,13 +146,6 @@ def save_audio(input_path, mask, spec, phase, **kwargs):
         out_audio = librosa.core.istft(pred_spec*phase, kwargs['hop_length'])
         librosa.output.write_wav(output_audio_path, out_audio, kwargs['sr'])
 
-def normalize_spec(spec):
-    s = spec**2
-    s = 100 * (s - np.min(s, 0))\
-        / np.maximum(np.max(s, 0) - np.min(s, 0), 1e-32)
-    s = s**0.5
-    return s
-
 def parse_args():
     parser = ArgumentParser()
     # basic arguments
@@ -243,12 +235,12 @@ def parse_args():
     if not args.duration:
         args.duration = None
     args.inference_name = [
+        args.mask_inference_name,
         args.embedding_inference_name,
-        args.mask_inference_name
     ]
-    if args.disable_mask_output:
-        args.inference_names.pop(1)
     if args.disable_embedding_inference:
+        args.inference_names.pop(1)
+    if args.disable_mask_output:
         args.inference_names.pop(0)
     args.n_inference = len(args.inference_name)
     if args.channel_name is None:
@@ -292,7 +284,7 @@ def parse_args():
     args.output_audio_mapper = output_audio_mapper
 
     if args.plot_spectrograms:
-        if not importlib.util.find_spec('chimeranet'):
+        if not importlib.util.find_spec('matplotlib'):
             parser.error(
                 '"--plot-spectrogram": matplotlib is not installed.'
             )

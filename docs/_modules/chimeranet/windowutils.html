@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>chimeranet.window_util &#8212; ChimeraNet  documentation</title>
+    <title>chimeranet.windowutils &#8212; ChimeraNet  documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -30,7 +30,7 @@
 
           <div class="body" role="main">
             
-  <h1>Source code for chimeranet.window_util</h1><div class="highlight"><pre>
+  <h1>Source code for chimeranet.windowutils</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">ceil</span>
@@ -40,7 +40,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">split into window</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="split_window"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.window_util.split_window">[docs]</a><span class="k">def</span> <span class="nf">split_window</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">window_length</span><span class="p">,</span> <span class="n">hop_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="split_window"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.windowutils.split_window">[docs]</a><span class="k">def</span> <span class="nf">split_window</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">window_length</span><span class="p">,</span> <span class="n">hop_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">hop_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">hop_length</span> <span class="o">=</span> <span class="n">window_length</span> <span class="o">//</span> <span class="mi">4</span>
     <span class="n">orig_shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
@@ -58,7 +58,7 @@
     <span class="p">])</span>
     <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="n">n_windows</span><span class="p">]</span><span class="o">+</span><span class="nb">list</span><span class="p">(</span><span class="n">orig_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span></div>
 
-<div class="viewcode-block" id="merge_windows_mean"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.window_util.merge_windows_mean">[docs]</a><span class="k">def</span> <span class="nf">merge_windows_mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hop_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="merge_windows_mean"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.windowutils.merge_windows_mean">[docs]</a><span class="k">def</span> <span class="nf">merge_windows_mean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hop_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">hop_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">hop_length</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">4</span>
     <span class="n">n_windows</span><span class="p">,</span> <span class="n">l_window</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -72,7 +72,7 @@
     <span class="n">x</span> <span class="o">=</span> <span class="n">numer</span> <span class="o">/</span> <span class="n">denom</span>
     <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">orig_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span></div>
 
-<div class="viewcode-block" id="merge_windows_most_common"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.window_util.merge_windows_most_common">[docs]</a><span class="k">def</span> <span class="nf">merge_windows_most_common</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hop_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="merge_windows_most_common"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.windowutils.merge_windows_most_common">[docs]</a><span class="k">def</span> <span class="nf">merge_windows_most_common</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hop_length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">hop_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">hop_length</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">4</span>
     <span class="n">n_windows</span><span class="p">,</span> <span class="n">l_window</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>

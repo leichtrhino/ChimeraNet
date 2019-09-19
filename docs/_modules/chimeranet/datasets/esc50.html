@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>chimeranet.datasets.esc50 &#8212; ChimeraNet  documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for chimeranet.datasets.esc50</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">load</span>
+
+<div class="viewcode-block" id="major_categories"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.esc50.major_categories">[docs]</a><span class="k">def</span> <span class="nf">major_categories</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;animals&#39;</span><span class="p">,</span> <span class="s1">&#39;natural&#39;</span><span class="p">,</span> <span class="s1">&#39;human&#39;</span><span class="p">,</span> <span class="s1">&#39;interior&#39;</span><span class="p">,</span> <span class="s1">&#39;exterior&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="categories_of"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.esc50.categories_of">[docs]</a><span class="k">def</span> <span class="nf">categories_of</span><span class="p">(</span><span class="n">major_categories</span><span class="p">):</span>
+    <span class="n">categories</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;animals&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dog&#39;</span><span class="p">,</span> <span class="s1">&#39;rooster&#39;</span><span class="p">,</span> <span class="s1">&#39;pig&#39;</span><span class="p">,</span> <span class="s1">&#39;cow&#39;</span><span class="p">,</span> <span class="s1">&#39;frog&#39;</span><span class="p">,</span> <span class="s1">&#39;cat&#39;</span><span class="p">,</span> <span class="s1">&#39;hen&#39;</span><span class="p">,</span> <span class="s1">&#39;insects&#39;</span><span class="p">,</span> <span class="s1">&#39;sheep&#39;</span><span class="p">,</span> <span class="s1">&#39;crow&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;natural&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;rain&#39;</span><span class="p">,</span> <span class="s1">&#39;sea_waves&#39;</span><span class="p">,</span> <span class="s1">&#39;crackling_fire&#39;</span><span class="p">,</span> <span class="s1">&#39;crickets&#39;</span><span class="p">,</span> <span class="s1">&#39;chirping_birds&#39;</span><span class="p">,</span> <span class="s1">&#39;water_drops&#39;</span><span class="p">,</span> <span class="s1">&#39;wind&#39;</span><span class="p">,</span> <span class="s1">&#39;pouring_water&#39;</span><span class="p">,</span> <span class="s1">&#39;toilet_flush&#39;</span><span class="p">,</span> <span class="s1">&#39;thunderstorm&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;human&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;crying_baby&#39;</span><span class="p">,</span> <span class="s1">&#39;sneezing&#39;</span><span class="p">,</span> <span class="s1">&#39;clapping&#39;</span><span class="p">,</span> <span class="s1">&#39;breathing&#39;</span><span class="p">,</span> <span class="s1">&#39;coughing&#39;</span><span class="p">,</span> <span class="s1">&#39;footsteps&#39;</span><span class="p">,</span> <span class="s1">&#39;laughing&#39;</span><span class="p">,</span> <span class="s1">&#39;brushing_teeth&#39;</span><span class="p">,</span> <span class="s1">&#39;snoring&#39;</span><span class="p">,</span> <span class="s1">&#39;drinking_sipping&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;interior&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;door_wood_knock&#39;</span><span class="p">,</span> <span class="s1">&#39;mouse_click&#39;</span><span class="p">,</span> <span class="s1">&#39;keyboard_typing&#39;</span><span class="p">,</span> <span class="s1">&#39;door_wood_creaks&#39;</span><span class="p">,</span> <span class="s1">&#39;can_opening&#39;</span><span class="p">,</span> <span class="s1">&#39;washing_machine&#39;</span><span class="p">,</span> <span class="s1">&#39;vacuum_cleaner&#39;</span><span class="p">,</span> <span class="s1">&#39;clock_alarm&#39;</span><span class="p">,</span> <span class="s1">&#39;clock_tick&#39;</span><span class="p">,</span> <span class="s1">&#39;glass_breaking&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;exterior&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;helicopter&#39;</span><span class="p">,</span> <span class="s1">&#39;chainsaw&#39;</span><span class="p">,</span> <span class="s1">&#39;siren&#39;</span><span class="p">,</span> <span class="s1">&#39;car_horn&#39;</span><span class="p">,</span> <span class="s1">&#39;engine&#39;</span><span class="p">,</span> <span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="s1">&#39;church_bells&#39;</span><span class="p">,</span> <span class="s1">&#39;airplane&#39;</span><span class="p">,</span> <span class="s1">&#39;fireworks&#39;</span><span class="p">,</span> <span class="s1">&#39;hand_saw&#39;</span><span class="p">]</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">major_categories</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">major_categories</span> <span class="o">=</span> <span class="p">[</span><span class="n">major_categories</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">((</span><span class="n">categories</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">major_categories</span><span class="p">),</span> <span class="p">[])</span></div>
+
+<div class="viewcode-block" id="all_categories"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.esc50.all_categories">[docs]</a><span class="k">def</span> <span class="nf">all_categories</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">categories_of</span><span class="p">(</span><span class="n">major_categories</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="ESC50"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.esc50.ESC50">[docs]</a><span class="k">class</span> <span class="nc">ESC50</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">category_list</span><span class="p">,</span> <span class="n">fold</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
+        <span class="n">name_col_idx</span><span class="p">,</span> <span class="n">fold_col_idx</span><span class="p">,</span> <span class="n">category_col_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="n">zf</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">zf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;ESC-50-master/meta/esc50.csv&#39;</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span>
+        <span class="n">check_category</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span>\
+            <span class="nb">any</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">category_col_idx</span><span class="p">]</span> <span class="o">==</span> <span class="n">cat</span> <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">category_list</span><span class="p">)</span>
+        <span class="n">check_fold</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">fold_col_idx</span><span class="p">])</span> <span class="ow">in</span> <span class="n">fold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">row</span><span class="p">[</span><span class="n">name_col_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span>
+            <span class="k">if</span> <span class="n">check_category</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="ow">and</span> <span class="n">check_fold</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">zf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<div class="viewcode-block" id="ESC50.load"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.esc50.ESC50.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">zf</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;ESC-50-master/audio/&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">zf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">name</span><span class="p">)),</span> <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span>
+        <span class="n">zf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ESC50.major_categories"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.esc50.ESC50.major_categories">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">major_categories</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">major_categories</span><span class="p">()</span></div>
+<div class="viewcode-block" id="ESC50.categories_of"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.esc50.ESC50.categories_of">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">categories_of</span><span class="p">(</span><span class="n">major_categories</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">categories_of</span><span class="p">(</span><span class="n">major_categories</span><span class="p">)</span></div>
+<div class="viewcode-block" id="ESC50.all_categories"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.esc50.ESC50.all_categories">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">all_categories</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">all_categories</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">ChimeraNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">chimeranet</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, arity-r.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

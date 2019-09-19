@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>chimeranet.postprocessing &#8212; ChimeraNet  documentation</title>
+    <title>chimeranet.reconstruction &#8212; ChimeraNet  documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -30,7 +30,7 @@
 
           <div class="body" role="main">
             
-  <h1>Source code for chimeranet.postprocessing</h1><div class="highlight"><pre>
+  <h1>Source code for chimeranet.reconstruction</h1><div class="highlight"><pre>
 <span></span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">sklearn</span>
@@ -39,7 +39,7 @@
 <span class="sd">input: NxTxFxD tensor</span>
 <span class="sd">output: NxCxFxT tensor</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="from_embedding"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.postprocessing.from_embedding">[docs]</a><span class="k">def</span> <span class="nf">from_embedding</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">n_channels</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="from_embedding"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.reconstruction.from_embedding">[docs]</a><span class="k">def</span> <span class="nf">from_embedding</span><span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">n_channels</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
     <span class="n">embedding_dim</span> <span class="o">=</span> <span class="n">embedding</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">labels</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">KMeans</span><span class="p">(</span>
         <span class="n">n_clusters</span><span class="o">=</span><span class="n">n_channels</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span>
@@ -55,7 +55,7 @@
 <span class="sd">input: NxTxFxC tensor</span>
 <span class="sd">output: NxCxFxT tensor</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="from_mask"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.postprocessing.from_mask">[docs]</a><span class="k">def</span> <span class="nf">from_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+<div class="viewcode-block" id="from_mask"><a class="viewcode-back" href="../../chimeranet.html#chimeranet.reconstruction.from_mask">[docs]</a><span class="k">def</span> <span class="nf">from_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
 </pre></div>
 

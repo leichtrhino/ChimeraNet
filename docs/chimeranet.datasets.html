@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>chimeranet.datasets package &#8212; ChimeraNet  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="chimeranet package" href="chimeranet.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="chimeranet-datasets-package">
+<h1>chimeranet.datasets package<a class="headerlink" href="#chimeranet-datasets-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-chimeranet.datasets.base">
+<span id="chimeranet-datasets-base-module"></span><h2>chimeranet.datasets.base module<a class="headerlink" href="#module-chimeranet.datasets.base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="chimeranet.datasets.base.Dataset">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.base.</code><code class="sig-name descname">Dataset</code><a class="reference internal" href="_modules/chimeranet/datasets/base.html#Dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="chimeranet.datasets.base.Dataset.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#Dataset.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.Dataset.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="chimeranet.datasets.base.DirDataset">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.base.</code><code class="sig-name descname">DirDataset</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#DirDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.DirDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.base.Dataset" title="chimeranet.datasets.base.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.base.Dataset</span></code></a></p>
+<dl class="method">
+<dt id="chimeranet.datasets.base.DirDataset.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#DirDataset.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.DirDataset.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="chimeranet.datasets.base.TarDataset">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.base.</code><code class="sig-name descname">TarDataset</code><span class="sig-paren">(</span><em class="sig-param">tarpath</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#TarDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.TarDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.base.Dataset" title="chimeranet.datasets.base.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.base.Dataset</span></code></a></p>
+<dl class="method">
+<dt id="chimeranet.datasets.base.TarDataset.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#TarDataset.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.TarDataset.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="chimeranet.datasets.base.ZipDataset">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.base.</code><code class="sig-name descname">ZipDataset</code><span class="sig-paren">(</span><em class="sig-param">zippath</em>, <em class="sig-param">path=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#ZipDataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.ZipDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.base.Dataset" title="chimeranet.datasets.base.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.base.Dataset</span></code></a></p>
+<dl class="method">
+<dt id="chimeranet.datasets.base.ZipDataset.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#ZipDataset.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.ZipDataset.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.datasets.base.is_audio_file">
+<code class="sig-prename descclassname">chimeranet.datasets.base.</code><code class="sig-name descname">is_audio_file</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#is_audio_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.is_audio_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.datasets.base.load">
+<code class="sig-prename descclassname">chimeranet.datasets.base.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">sr=44100</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/base.html#load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.base.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-chimeranet.datasets.dsd100">
+<span id="chimeranet-datasets-dsd100-module"></span><h2>chimeranet.datasets.dsd100 module<a class="headerlink" href="#module-chimeranet.datasets.dsd100" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="chimeranet.datasets.dsd100.DSD100">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.dsd100.</code><code class="sig-name descname">DSD100</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">inst_list</em>, <em class="sig-param">dev=True</em>, <em class="sig-param">test=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/dsd100.html#DSD100"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.dsd100.DSD100" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.base.Dataset" title="chimeranet.datasets.base.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.base.Dataset</span></code></a></p>
+<dl class="method">
+<dt id="chimeranet.datasets.dsd100.DSD100.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/dsd100.html#DSD100.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.dsd100.DSD100.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="chimeranet.datasets.dsd100.DSD100Melody">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.dsd100.</code><code class="sig-name descname">DSD100Melody</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">dev=True</em>, <em class="sig-param">test=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/dsd100.html#DSD100Melody"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.dsd100.DSD100Melody" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.dsd100.DSD100" title="chimeranet.datasets.dsd100.DSD100"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.dsd100.DSD100</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="chimeranet.datasets.dsd100.DSD100Vocal">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.dsd100.</code><code class="sig-name descname">DSD100Vocal</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">dev=True</em>, <em class="sig-param">test=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/dsd100.html#DSD100Vocal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.dsd100.DSD100Vocal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.dsd100.DSD100" title="chimeranet.datasets.dsd100.DSD100"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.dsd100.DSD100</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-chimeranet.datasets.esc50">
+<span id="chimeranet-datasets-esc50-module"></span><h2>chimeranet.datasets.esc50 module<a class="headerlink" href="#module-chimeranet.datasets.esc50" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="chimeranet.datasets.esc50.ESC50">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.esc50.</code><code class="sig-name descname">ESC50</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">category_list</em>, <em class="sig-param">fold=(1</em>, <em class="sig-param">2</em>, <em class="sig-param">3</em>, <em class="sig-param">4)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/esc50.html#ESC50"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.esc50.ESC50" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.base.Dataset" title="chimeranet.datasets.base.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.base.Dataset</span></code></a></p>
+<dl class="method">
+<dt id="chimeranet.datasets.esc50.ESC50.all_categories">
+<em class="property">static </em><code class="sig-name descname">all_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/esc50.html#ESC50.all_categories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.esc50.ESC50.all_categories" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="chimeranet.datasets.esc50.ESC50.categories_of">
+<em class="property">static </em><code class="sig-name descname">categories_of</code><span class="sig-paren">(</span><em class="sig-param">major_categories</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/esc50.html#ESC50.categories_of"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.esc50.ESC50.categories_of" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="chimeranet.datasets.esc50.ESC50.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/esc50.html#ESC50.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.esc50.ESC50.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="chimeranet.datasets.esc50.ESC50.major_categories">
+<em class="property">static </em><code class="sig-name descname">major_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/esc50.html#ESC50.major_categories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.esc50.ESC50.major_categories" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.datasets.esc50.all_categories">
+<code class="sig-prename descclassname">chimeranet.datasets.esc50.</code><code class="sig-name descname">all_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/esc50.html#all_categories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.esc50.all_categories" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.datasets.esc50.categories_of">
+<code class="sig-prename descclassname">chimeranet.datasets.esc50.</code><code class="sig-name descname">categories_of</code><span class="sig-paren">(</span><em class="sig-param">major_categories</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/esc50.html#categories_of"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.esc50.categories_of" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="chimeranet.datasets.esc50.major_categories">
+<code class="sig-prename descclassname">chimeranet.datasets.esc50.</code><code class="sig-name descname">major_categories</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/esc50.html#major_categories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.esc50.major_categories" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-chimeranet.datasets.lmd">
+<span id="chimeranet-datasets-lmd-module"></span><h2>chimeranet.datasets.lmd module<a class="headerlink" href="#module-chimeranet.datasets.lmd" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="chimeranet.datasets.lmd.LMD">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.lmd.</code><code class="sig-name descname">LMD</code><span class="sig-paren">(</span><em class="sig-param">path=None</em>, <em class="sig-param">root='lmd_full'</em>, <em class="sig-param">fold='0123456789abc'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/lmd.html#LMD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.lmd.LMD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.base.Dataset" title="chimeranet.datasets.base.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.base.Dataset</span></code></a></p>
+<dl class="method">
+<dt id="chimeranet.datasets.lmd.LMD.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/lmd.html#LMD.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.lmd.LMD.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-chimeranet.datasets.voxceleb">
+<span id="chimeranet-datasets-voxceleb-module"></span><h2>chimeranet.datasets.voxceleb module<a class="headerlink" href="#module-chimeranet.datasets.voxceleb" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="chimeranet.datasets.voxceleb.VoxCeleb">
+<em class="property">class </em><code class="sig-prename descclassname">chimeranet.datasets.voxceleb.</code><code class="sig-name descname">VoxCeleb</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/voxceleb.html#VoxCeleb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.voxceleb.VoxCeleb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#chimeranet.datasets.base.Dataset" title="chimeranet.datasets.base.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">chimeranet.datasets.base.Dataset</span></code></a></p>
+<dl class="method">
+<dt id="chimeranet.datasets.voxceleb.VoxCeleb.load">
+<code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">index</em>, <em class="sig-param">sr</em>, <em class="sig-param">offset=0.0</em>, <em class="sig-param">duration=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chimeranet/datasets/voxceleb.html#VoxCeleb.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#chimeranet.datasets.voxceleb.VoxCeleb.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-chimeranet.datasets">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-chimeranet.datasets" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">ChimeraNet</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">chimeranet</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="chimeranet.html">chimeranet package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">chimeranet</a><ul>
+  <li><a href="chimeranet.html">chimeranet package</a><ul>
+      <li>Previous: <a href="chimeranet.html" title="previous chapter">chimeranet package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, arity-r.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/chimeranet.datasets.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

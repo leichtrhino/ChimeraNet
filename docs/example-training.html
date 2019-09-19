@@ -243,17 +243,17 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="o">%%capture</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
-<span class="kn">from</span> <span class="nn">chimeranet.model</span> <span class="k">import</span> <span class="n">ChimeraPPModel</span>
+<span class="kn">from</span> <span class="nn">chimeranet.models</span> <span class="k">import</span> <span class="n">ChimeraPPModel</span>
 
 <span class="c1"># probe shape of dataset and set embedding dimension</span>
-<span class="n">dataset_path</span> <span class="o">=</span> <span class="s1">&#39;example-dataset.hdf5&#39;</span>
+<span class="n">dataset_path</span> <span class="o">=</span> <span class="s1">&#39;example-dataset-train.hdf5&#39;</span>
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;specs_train&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;y/embedding&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
 <span class="n">D</span> <span class="o">=</span> <span class="mi">20</span>
 <span class="n">cm</span> <span class="o">=</span> <span class="n">ChimeraPPModel</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
 
 <span class="c1"># build_model returns Keras&#39; Model object</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">build_model</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">build_model</span><span class="p">()</span>
 <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
     <span class="s1">&#39;rmsprop&#39;</span><span class="p">,</span>
     <span class="n">loss</span><span class="o">=</span><span class="p">{</span>
@@ -276,20 +276,17 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">chimeranet.preprocessing</span> <span class="k">import</span> <span class="n">to_mixture</span><span class="p">,</span> <span class="n">to_true_pair</span>
-
-<span class="c1"># load data first</span>
+<span></span><span class="c1"># load train and validation data</span>
+<span class="n">dataset_validation_path</span> <span class="o">=</span> <span class="s1">&#39;example-dataset-validation.hdf5&#39;</span>
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">specs_train</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;specs_train&#39;</span><span class="p">][()]</span>
-    <span class="n">specs_validation</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;specs_validation&#39;</span><span class="p">][()]</span>
-
-<span class="n">x_train</span> <span class="o">=</span> <span class="n">to_mixture</span><span class="p">(</span><span class="n">specs_train</span><span class="p">)</span>
-<span class="n">y_train</span> <span class="o">=</span> <span class="n">to_true_pair</span><span class="p">(</span><span class="n">specs_validation</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">)</span>
-<span class="n">x_validation</span> <span class="o">=</span> <span class="n">to_mixture</span><span class="p">(</span><span class="n">specs_validation</span><span class="p">)</span>
-<span class="n">y_validation</span> <span class="o">=</span> <span class="n">to_true_pair</span><span class="p">(</span><span class="n">specs_validation</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">)</span>
+    <span class="n">x_train</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][()]</span>
+    <span class="n">y_train</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;y/mask&#39;</span><span class="p">][()],</span> <span class="s1">&#39;embedding&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;y/embedding&#39;</span><span class="p">][()]}</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">dataset_validation_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">x_validation</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][()]</span>
+    <span class="n">y_validation</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mask&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;y/mask&#39;</span><span class="p">][()],</span> <span class="s1">&#39;embedding&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;y/embedding&#39;</span><span class="p">][()]}</span>
 
 <span class="c1"># train model by model.fit function</span>
-<span class="n">history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
     <span class="n">x</span><span class="o">=</span><span class="n">x_train</span><span class="p">,</span>
     <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
     <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span><span class="n">x_validation</span><span class="p">,</span> <span class="n">y_validation</span><span class="p">),</span>
@@ -307,63 +304,28 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Train on 320 samples, validate on 320 samples
+Train on 160 samples, validate on 160 samples
 Epoch 1/10
-320/320 [==============================] - 229s 714ms/step - loss: 17003.3059 - embedding_loss: 10783.3487 - mask_loss: 72982.9227 - val_loss: 13945.3063 - val_embedding_loss: 8448.1246 - val_mask_loss: 63419.9402
+160/160 [==============================] - 261s 2s/step - loss: 18381.2736 - embedding_loss: 18457.8914 - mask_loss: 17691.7186 - val_loss: 12940.3148 - val_embedding_loss: 12466.7975 - val_mask_loss: 17201.9725
 Epoch 2/10
-320/320 [==============================] - 220s 686ms/step - loss: 16263.3183 - embedding_loss: 9501.0065 - mask_loss: 77124.1242 - val_loss: 13968.2887 - val_embedding_loss: 8483.1206 - val_mask_loss: 63334.8023
+160/160 [==============================] - 258s 2s/step - loss: 12468.0131 - embedding_loss: 12140.8994 - mask_loss: 15412.0373 - val_loss: 11921.1551 - val_embedding_loss: 11286.8416 - val_mask_loss: 17629.9813
 Epoch 3/10
-320/320 [==============================] - 229s 717ms/step - loss: 13858.2923 - embedding_loss: 8357.1154 - mask_loss: 63368.8863 - val_loss: 13331.5953 - val_embedding_loss: 8231.6581 - val_mask_loss: 59231.0293
+160/160 [==============================] - 266s 2s/step - loss: 12008.5932 - embedding_loss: 11784.1303 - mask_loss: 14028.7604 - val_loss: 11863.6486 - val_embedding_loss: 11170.0996 - val_mask_loss: 18105.5883
 Epoch 4/10
-320/320 [==============================] - 228s 711ms/step - loss: 13583.9371 - embedding_loss: 8371.6234 - mask_loss: 60494.7609 - val_loss: 13335.9337 - val_embedding_loss: 8207.0659 - val_mask_loss: 59495.7453
+160/160 [==============================] - 266s 2s/step - loss: 12022.4951 - embedding_loss: 11823.9797 - mask_loss: 13809.1371 - val_loss: 11875.8588 - val_embedding_loss: 11263.6596 - val_mask_loss: 17385.6521
 Epoch 5/10
-320/320 [==============================] - 266s 832ms/step - loss: 13511.2723 - embedding_loss: 8293.4189 - mask_loss: 60471.9520 - val_loss: 13286.5097 - val_embedding_loss: 8211.3033 - val_mask_loss: 58963.3664
+160/160 [==============================] - 266s 2s/step - loss: 11840.2252 - embedding_loss: 11682.9516 - mask_loss: 13255.6879 - val_loss: 11862.4658 - val_embedding_loss: 11327.9975 - val_mask_loss: 16672.6859
 Epoch 6/10
-320/320 [==============================] - 255s 795ms/step - loss: 13456.3530 - embedding_loss: 8322.8688 - mask_loss: 59657.7113 - val_loss: 13562.0700 - val_embedding_loss: 8346.3349 - val_mask_loss: 60503.6883
+160/160 [==============================] - 273s 2s/step - loss: 11768.4652 - embedding_loss: 11728.4332 - mask_loss: 12128.7551 - val_loss: 11538.6459 - val_embedding_loss: 11066.1010 - val_mask_loss: 15791.5525
 Epoch 7/10
-320/320 [==============================] - 284s 886ms/step - loss: 13448.8960 - embedding_loss: 8255.8210 - mask_loss: 60186.5707 - val_loss: 13443.8649 - val_embedding_loss: 8438.6134 - val_mask_loss: 58491.1285
+160/160 [==============================] - 270s 2s/step - loss: 11755.5100 - embedding_loss: 11649.7219 - mask_loss: 12707.6035 - val_loss: 11632.5807 - val_embedding_loss: 11140.6088 - val_mask_loss: 16060.3297
 Epoch 8/10
-320/320 [==============================] - 301s 941ms/step - loss: 13436.9629 - embedding_loss: 8239.3518 - mask_loss: 60215.4629 - val_loss: 13383.8507 - val_embedding_loss: 8350.3388 - val_mask_loss: 58685.4586
+160/160 [==============================] - 276s 2s/step - loss: 11816.1187 - embedding_loss: 11642.1570 - mask_loss: 13381.7742 - val_loss: 11814.3582 - val_embedding_loss: 11381.6398 - val_mask_loss: 15708.8264
 Epoch 9/10
-320/320 [==============================] - 323s 1s/step - loss: 13350.3758 - embedding_loss: 8234.3646 - mask_loss: 59394.4770 - val_loss: 13345.2675 - val_embedding_loss: 8231.7089 - val_mask_loss: 59367.2965
+160/160 [==============================] - 270s 2s/step - loss: 11801.6576 - embedding_loss: 11660.4234 - mask_loss: 13072.7674 - val_loss: 11853.9027 - val_embedding_loss: 11215.5012 - val_mask_loss: 17599.5209
 Epoch 10/10
-320/320 [==============================] - 329s 1s/step - loss: 13467.0676 - embedding_loss: 8263.6016 - mask_loss: 60298.2648 - val_loss: 13316.9633 - val_embedding_loss: 8271.7642 - val_mask_loss: 58723.7559
+160/160 [==============================] - 283s 2s/step - loss: 11742.7662 - embedding_loss: 11698.4328 - mask_loss: 12141.7742 - val_loss: 11385.7367 - val_embedding_loss: 11052.1635 - val_mask_loss: 14387.8969
 </pre></div></div>
-</div>
-</div>
-<div class="section" id="Showing-learning-curve">
-<h2>Showing learning curve<a class="headerlink" href="#Showing-learning-curve" title="Permalink to this headline">¶</a></h2>
-<p>Also, you can plot learning curve. for more information, see keras documentation</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;epochs&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;loss&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">bbox_transform</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">transFigure</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;matplotlib.legend.Legend at 0xdfc786eb00&gt;
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="_images/example-training_6_1.png" src="_images/example-training_6_1.png" />
-</div>
 </div>
 </div>
 </div>

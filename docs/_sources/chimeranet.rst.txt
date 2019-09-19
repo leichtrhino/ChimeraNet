@@ -6,63 +6,47 @@ Subpackages
 
 .. toctree::
 
-   chimeranet.dataset_loader
+   chimeranet.datasets
 
 Submodules
 ----------
 
-chimeranet.audio\_loader module
--------------------------------
+chimeranet.models module
+------------------------
 
-.. automodule:: chimeranet.audio_loader
+.. automodule:: chimeranet.models
    :members:
    :undoc-members:
    :show-inheritance:
 
-chimeranet.audio\_mixer module
-------------------------------
-
-.. automodule:: chimeranet.audio_mixer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-chimeranet.model module
------------------------
-
-.. automodule:: chimeranet.model
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-chimeranet.postprocessing module
+chimeranet.reconstruction module
 --------------------------------
 
-.. automodule:: chimeranet.postprocessing
+.. automodule:: chimeranet.reconstruction
    :members:
    :undoc-members:
    :show-inheritance:
 
-chimeranet.preprocessing module
--------------------------------
+chimeranet.sampling module
+--------------------------
 
-.. automodule:: chimeranet.preprocessing
+.. automodule:: chimeranet.sampling
    :members:
    :undoc-members:
    :show-inheritance:
 
-chimeranet.restoration module
+chimeranet.training module
+--------------------------
+
+.. automodule:: chimeranet.training
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+chimeranet.windowutils module
 -----------------------------
 
-.. automodule:: chimeranet.restoration
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-chimeranet.window\_util module
-------------------------------
-
-.. automodule:: chimeranet.window_util
+.. automodule:: chimeranet.windowutils
    :members:
    :undoc-members:
    :show-inheritance:

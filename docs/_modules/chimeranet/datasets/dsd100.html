@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>chimeranet.dataset_loader.dsd100 &#8212; ChimeraNet  documentation</title>
+    <title>chimeranet.datasets.dsd100 &#8212; ChimeraNet  documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -30,21 +30,17 @@
 
           <div class="body" role="main">
             
-  <h1>Source code for chimeranet.dataset_loader.dsd100</h1><div class="highlight"><pre>
+  <h1>Source code for chimeranet.datasets.dsd100</h1><div class="highlight"><pre>
 <span></span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">zipfile</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">import</span> <span class="nn">librosa</span>
-<span class="kn">import</span> <span class="nn">soundfile</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">..audio_loader</span> <span class="k">import</span> <span class="n">AudioLoader</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">load</span>
 
-<div class="viewcode-block" id="DSD100Loader"><a class="viewcode-back" href="../../../chimeranet.dataset_loader.html#chimeranet.dataset_loader.dsd100.DSD100Loader">[docs]</a><span class="k">class</span> <span class="nc">DSD100Loader</span><span class="p">(</span><span class="n">AudioLoader</span><span class="p">):</span>
+<div class="viewcode-block" id="DSD100"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.dsd100.DSD100">[docs]</a><span class="k">class</span> <span class="nc">DSD100</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="c1"># inst_list contains (&#39;bass&#39;, &#39;drums&#39;, &#39;other&#39;, &#39;vocals&#39;)</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">inst_list</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">inst_list</span> <span class="o">=</span> <span class="n">inst_list</span>
         <span class="n">prefix_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -62,35 +58,24 @@
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">zf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__del__</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">_load_audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DSD100.load"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.dsd100.DSD100.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">zf</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">offset_</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inst_list</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">+</span><span class="n">inst</span><span class="o">+</span><span class="s1">&#39;.wav&#39;</span>
-            <span class="n">data_</span><span class="p">,</span> <span class="n">sr_</span> <span class="o">=</span> <span class="n">soundfile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">zf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
-            <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">sample_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="n">sr_</span><span class="p">)</span>
-                <span class="n">sample_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">offset</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">data_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">sample_size</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-                <span class="n">data_</span> <span class="o">=</span> <span class="n">data_</span><span class="p">[</span><span class="n">sample_offset</span><span class="p">:</span><span class="n">sample_offset</span><span class="o">+</span><span class="n">sample_size</span><span class="p">]</span>
-            <span class="n">data_</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">librosa</span><span class="o">.</span><span class="n">to_mono</span><span class="p">(</span><span class="n">data_</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">sr_</span><span class="p">,</span> <span class="n">sr</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">data_</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">+=</span> <span class="n">data_</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="n">load</span><span class="p">(</span>
+                <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">zf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">+</span><span class="n">inst</span><span class="o">+</span><span class="s1">&#39;.wav&#39;</span><span class="p">)),</span>
+                <span class="n">sr</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">duration</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inst_list</span>
+        <span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">zf</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="n">data</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inst_list</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">y</span></div>
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_list</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DSD100MelodyLoader"><a class="viewcode-back" href="../../../chimeranet.dataset_loader.html#chimeranet.dataset_loader.dsd100.DSD100MelodyLoader">[docs]</a><span class="k">class</span> <span class="nc">DSD100MelodyLoader</span><span class="p">(</span><span class="n">DSD100Loader</span><span class="p">):</span>
+<div class="viewcode-block" id="DSD100Melody"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.dsd100.DSD100Melody">[docs]</a><span class="k">class</span> <span class="nc">DSD100Melody</span><span class="p">(</span><span class="n">DSD100</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;bass&#39;</span><span class="p">,</span> <span class="s1">&#39;drums&#39;</span><span class="p">,</span> <span class="s1">&#39;other&#39;</span><span class="p">],</span> <span class="n">dev</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DSD100VocalLoader"><a class="viewcode-back" href="../../../chimeranet.dataset_loader.html#chimeranet.dataset_loader.dsd100.DSD100VocalLoader">[docs]</a><span class="k">class</span> <span class="nc">DSD100VocalLoader</span><span class="p">(</span><span class="n">DSD100Loader</span><span class="p">):</span>
+<div class="viewcode-block" id="DSD100Vocal"><a class="viewcode-back" href="../../../chimeranet.datasets.html#chimeranet.datasets.dsd100.DSD100Vocal">[docs]</a><span class="k">class</span> <span class="nc">DSD100Vocal</span><span class="p">(</span><span class="n">DSD100</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;vocals&#39;</span><span class="p">],</span> <span class="n">dev</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span></div>
 </pre></div>

@@ -236,75 +236,94 @@ div.rendered_html tbody tr:hover {
 <h1>Preparation<a class="headerlink" href="#Preparation" title="Permalink to this headline">¶</a></h1>
 <p>In this example, we prepare training/validation data for melody/vocal separation task.</p>
 <p>Before running bunch of codes below, please download <code class="docutils literal notranslate"><span class="pre">DSD100</span></code> dataset from <a class="reference external" href="https://sigsep.github.io/datasets/dsd100.html">the DSD100 download page</a> and say it <code class="docutils literal notranslate"><span class="pre">DSD100.zip</span></code>.</p>
-<div class="section" id="Initializing-AudioMixer">
-<h2>Initializing <code class="docutils literal notranslate"><span class="pre">AudioMixer</span></code><a class="headerlink" href="#Initializing-AudioMixer" title="Permalink to this headline">¶</a></h2>
-<div class="nbinput docutils container">
+<div class="section" id="Initialize-Sampler-for-train">
+<h2>Initialize <code class="docutils literal notranslate"><span class="pre">Sampler</span></code> for train<a class="headerlink" href="#Initialize-Sampler-for-train" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">chimeranet.audio_mixer</span> <span class="k">import</span> <span class="n">AudioMixer</span>
-<span class="kn">from</span> <span class="nn">chimeranet.dataset_loader.dsd100</span>\
-    <span class="kn">import</span> <span class="nn">DSD100MelodyLoader</span><span class="o">,</span> <span class="nn">DSD100VocalLoader</span>
+<span></span><span class="kn">from</span> <span class="nn">chimeranet.datasets</span> <span class="k">import</span> <span class="n">DSD100Melody</span><span class="p">,</span> <span class="n">DSD100Vocal</span>
+<span class="kn">from</span> <span class="nn">chimeranet</span> <span class="k">import</span> <span class="n">DatasetSampler</span><span class="p">,</span> <span class="n">SyncSampler</span>
 
-<span class="n">dsd_path</span> <span class="o">=</span> <span class="s1">&#39;DSD100.zip&#39;</span>
-<span class="n">am</span> <span class="o">=</span> <span class="n">AudioMixer</span><span class="p">()</span>
-<span class="n">am</span><span class="o">.</span><span class="n">add_loader</span><span class="p">(</span>
-    <span class="n">DSD100MelodyLoader</span><span class="p">(</span><span class="n">dsd_path</span><span class="p">),</span>
-    <span class="n">a_time</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span> <span class="c1"># data augmentation on time axis</span>
-    <span class="n">a_freq</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span>  <span class="c1"># data augmentation on frequency axis</span>
-    <span class="n">a_amp</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">),</span> <span class="c1"># data augmentation on signal power</span>
-<span class="p">)</span><span class="o">.</span><span class="n">add_loader</span><span class="p">(</span>
-    <span class="n">DSD100VocalLoader</span><span class="p">(</span><span class="n">dsd_path</span><span class="p">),</span>
-    <span class="n">a_time</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span>
-    <span class="n">a_freq</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span>
-    <span class="n">a_amp</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">),</span>
-<span class="p">)</span>
+<span class="n">dsd100_path</span> <span class="o">=</span> <span class="s1">&#39;DSD100.zip&#39;</span>
+<span class="n">duration</span> <span class="o">=</span> <span class="mf">2.</span>
+<span class="n">sr</span> <span class="o">=</span> <span class="mi">16000</span>
+
+<span class="c1"># Dataset</span>
+<span class="n">vocal_dataset</span> <span class="o">=</span> <span class="n">DSD100Vocal</span><span class="p">(</span><span class="n">dsd100_path</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1"># Sampler</span>
+<span class="n">vocal_sampler</span> <span class="o">=</span> <span class="n">DatasetSampler</span><span class="p">(</span><span class="n">vocal_dataset</span><span class="p">)</span>
+<span class="c1"># augmentation</span>
+<span class="n">vocal_sampler</span><span class="o">.</span><span class="n">amplitude_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">vocal_sampler</span><span class="o">.</span><span class="n">stretch_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">vocal_sampler</span><span class="o">.</span><span class="n">shift_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># do same things to melody channel</span>
+<span class="n">melody_dataset</span> <span class="o">=</span> <span class="n">DSD100Melody</span><span class="p">(</span><span class="n">dsd100_path</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">melody_sampler</span> <span class="o">=</span> <span class="n">DatasetSampler</span><span class="p">(</span><span class="n">melody_dataset</span><span class="p">)</span>
+<span class="n">melody_sampler</span><span class="o">.</span><span class="n">amplitude_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">melody_sampler</span><span class="o">.</span><span class="n">stretch_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">melody_sampler</span><span class="o">.</span><span class="n">shift_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># combine two channels together</span>
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">SyncSampler</span><span class="p">(</span><span class="n">vocal_sampler</span><span class="p">,</span> <span class="n">melody_sampler</span><span class="p">)</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">duration</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">samplerate</span> <span class="o">=</span> <span class="n">sr</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
-</pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>&lt;chimeranet.audio_mixer.AudioMixer at 0xba0a4c23c8&gt;
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="Mix-audio-and-make-training-data">
-<h2>Mix audio and make training data<a class="headerlink" href="#Mix-audio-and-make-training-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Sample-audio-and-make-train-data">
+<h2>Sample audio and make train data<a class="headerlink" href="#Sample-audio-and-make-train-data" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">time</span><span class="p">,</span> <span class="n">sr</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">16000</span>
-<span class="n">n_fft</span><span class="p">,</span> <span class="n">hop_length</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span> <span class="mi">128</span>
+<span></span><span class="kn">import</span> <span class="nn">librosa</span>
+<span class="kn">from</span> <span class="nn">chimeranet</span> <span class="k">import</span> <span class="n">to_training_data</span>
+<span class="n">n_fft</span> <span class="o">=</span> <span class="mi">512</span>
+<span class="n">hop_length</span> <span class="o">=</span> <span class="mi">128</span>
 <span class="n">n_mels</span> <span class="o">=</span> <span class="mi">150</span>
-<span class="n">am</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">sr</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span><span class="o">.</span><span class="n">n_fft</span><span class="p">(</span><span class="n">n_fft</span><span class="p">)</span><span class="o">.</span><span class="n">hop_length</span><span class="p">(</span><span class="n">hop_length</span><span class="p">)</span><span class="o">.</span><span class="n">n_mels</span><span class="p">(</span><span class="n">n_mels</span><span class="p">)</span>
-<span class="n">am</span><span class="o">.</span><span class="n">sync_flag</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sample_size</span> <span class="o">=</span> <span class="mi">32</span>
 
-<span class="n">sample_size</span> <span class="o">=</span> <span class="mi">320</span>
-<span class="n">specs_train</span> <span class="o">=</span> <span class="n">am</span><span class="o">.</span><span class="n">make_specs</span><span class="p">(</span><span class="n">sample_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span> <span class="c1"># mix on 4 processes</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">time_to_frames</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sr</span><span class="p">,</span> <span class="n">hop_length</span><span class="p">,</span> <span class="n">n_fft</span><span class="p">)</span>
+<span class="n">F</span> <span class="o">=</span> <span class="n">n_mels</span>
+
+<span class="n">samples</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sample_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">to_training_data</span><span class="p">(</span>
+    <span class="n">samples</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span> <span class="n">n_fft</span><span class="o">=</span><span class="n">n_fft</span><span class="p">,</span> <span class="n">hop_length</span><span class="o">=</span><span class="n">hop_length</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
-<div class="section" id="Showing-one-of-the-training-data">
-<h2>Showing one of the training data<a class="headerlink" href="#Showing-one-of-the-training-data" title="Permalink to this headline">¶</a></h2>
-<div class="nbinput docutils container">
+<div class="section" id="Save-train-data">
+<h2>Save train data<a class="headerlink" href="#Save-train-data" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;example-dataset-train.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">x_train</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;y/mask&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="s1">&#39;mask&#39;</span><span class="p">])</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;y/embedding&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y_train</span><span class="p">[</span><span class="s1">&#39;embedding&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Show-one-of-the-training-data">
+<h2>Show one of the training data<a class="headerlink" href="#Show-one-of-the-training-data" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="o">%</span><span class="k">matplotlib</span> inline
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">chimeranet.preprocessing</span> <span class="k">import</span> <span class="n">to_mixture</span><span class="p">,</span> <span class="n">to_true_pair</span>
-
-<span class="n">x_train</span> <span class="o">=</span> <span class="n">to_mixture</span><span class="p">(</span><span class="n">specs_train</span><span class="p">)</span>
-<span class="n">y_train</span> <span class="o">=</span> <span class="n">to_true_pair</span><span class="p">(</span><span class="n">specs_train</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1e-16</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="s1">&#39;softmax&#39;</span><span class="p">)</span> <span class="c1"># if mask=&#39;binary&#39;, generate ibm</span>
 
 <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">mixture</span> <span class="o">=</span> <span class="n">x_train</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
@@ -315,11 +334,11 @@ div.rendered_html tbody tr:hover {
 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="s1">&#39;Mixture&#39;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mixture</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">mask_e</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Melody&#39;</span><span class="p">,</span> <span class="s1">&#39;Vocal&#39;</span><span class="p">)),</span> <span class="mi">1</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">mask_e</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Vocal&#39;</span><span class="p">,</span> <span class="s1">&#39;Melody&#39;</span><span class="p">)),</span> <span class="mi">1</span><span class="p">):</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">+</span><span class="n">i</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">mask_m</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Melody&#39;</span><span class="p">,</span> <span class="s1">&#39;Vocal&#39;</span><span class="p">)),</span> <span class="mi">1</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">mask_m</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;Vocal&#39;</span><span class="p">,</span> <span class="s1">&#39;Melody&#39;</span><span class="p">)),</span> <span class="mi">1</span><span class="p">):</span>
     <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">+</span><span class="n">i</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">set_text</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -330,7 +349,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/example-preparation_6_0.png" src="_images/example-preparation_6_0.png" />
+<img alt="_images/example-preparation_8_0.png" src="_images/example-preparation_8_0.png" />
 </div>
 </div>
 </div>
@@ -338,33 +357,40 @@ div.rendered_html tbody tr:hover {
 <h2>Validation data<a class="headerlink" href="#Validation-data" title="Permalink to this headline">¶</a></h2>
 <p>Like training data, validation data can be made in almost same way.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">am_val</span> <span class="o">=</span> <span class="n">AudioMixer</span><span class="p">()</span>
-<span class="n">am_val</span><span class="o">.</span><span class="n">add_loader</span><span class="p">(</span><span class="n">DSD100MelodyLoader</span><span class="p">(</span><span class="n">dsd_path</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>\
-    <span class="o">.</span><span class="n">add_loader</span><span class="p">(</span><span class="n">DSD100VocalLoader</span><span class="p">(</span><span class="n">dsd_path</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-<span class="n">am_val</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">n_mels</span><span class="p">(</span><span class="n">n_mels</span><span class="p">)</span><span class="o">.</span><span class="n">sr</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span><span class="o">.</span><span class="n">n_fft</span><span class="p">(</span><span class="n">n_fft</span><span class="p">)</span><span class="o">.</span><span class="n">hop_length</span><span class="p">(</span><span class="n">hop_length</span><span class="p">)</span>
-<span class="n">am_val</span><span class="o">.</span><span class="n">sync_flag</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="n">specs_validation</span> <span class="o">=</span> <span class="n">am_val</span><span class="o">.</span><span class="n">make_specs</span><span class="p">(</span><span class="n">sample_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="Saving">
-<h2>Saving<a class="headerlink" href="#Saving" title="Permalink to this headline">¶</a></h2>
-<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<span></span><span class="c1"># vocal channel</span>
+<span class="n">vocal_dataset</span> <span class="o">=</span> <span class="n">DSD100Vocal</span><span class="p">(</span><span class="n">dsd100_path</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">vocal_sampler</span> <span class="o">=</span> <span class="n">DatasetSampler</span><span class="p">(</span><span class="n">vocal_dataset</span><span class="p">)</span>
+<span class="n">vocal_sampler</span><span class="o">.</span><span class="n">amplitude_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">vocal_sampler</span><span class="o">.</span><span class="n">stretch_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">vocal_sampler</span><span class="o">.</span><span class="n">shift_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
 
-<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;example-dataset.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;specs_train&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">specs_train</span><span class="p">)</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;specs_validation&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">specs_validation</span><span class="p">)</span>
+<span class="c1"># melody channel</span>
+<span class="n">melody_dataset</span> <span class="o">=</span> <span class="n">DSD100Melody</span><span class="p">(</span><span class="n">dsd100_path</span><span class="p">,</span> <span class="n">dev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">melody_sampler</span> <span class="o">=</span> <span class="n">DatasetSampler</span><span class="p">(</span><span class="n">melody_dataset</span><span class="p">)</span>
+<span class="n">melody_sampler</span><span class="o">.</span><span class="n">amplitude_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">melody_sampler</span><span class="o">.</span><span class="n">stretch_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">melody_sampler</span><span class="o">.</span><span class="n">shift_factor</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># combine two channels together</span>
+<span class="n">sampler</span> <span class="o">=</span> <span class="n">SyncSampler</span><span class="p">(</span><span class="n">vocal_sampler</span><span class="p">,</span> <span class="n">melody_sampler</span><span class="p">)</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">duration</span>
+<span class="n">sampler</span><span class="o">.</span><span class="n">samplerate</span> <span class="o">=</span> <span class="n">sr</span>
+
+<span class="c1"># make validation data</span>
+<span class="n">samples</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sample_size</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">x_validation</span><span class="p">,</span> <span class="n">y_validation</span> <span class="o">=</span> <span class="n">to_training_data</span><span class="p">(</span>
+    <span class="n">samples</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span> <span class="n">n_fft</span><span class="o">=</span><span class="n">n_fft</span><span class="p">,</span> <span class="n">hop_length</span><span class="o">=</span><span class="n">hop_length</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># save validation data</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;example-dataset-validation.hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">x_train</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;y/mask&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y_validation</span><span class="p">[</span><span class="s1">&#39;mask&#39;</span><span class="p">])</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s1">&#39;y/embedding&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y_validation</span><span class="p">[</span><span class="s1">&#39;embedding&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
