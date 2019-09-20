@@ -8,6 +8,7 @@ Table of contents
   :maxdepth: 2
 
   install
+  scripts
   examples
 
 Package reference
