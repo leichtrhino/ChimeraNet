@@ -21,6 +21,7 @@ setup(
     ],
     scripts=[
         'scripts/chimeranet-prepare.py',
+        'scripts/chimeranet-show-data.py',
         'scripts/chimeranet-train.py',
         'scripts/chimeranet-separate.py',
     ],
