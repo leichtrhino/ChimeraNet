@@ -48,14 +48,19 @@ def part(input_path, **kwargs):
     )
     if 0 < kwargs['n_mels'] < kwargs['n_fft'] // 2 + 1:
         spec = np.dot(kwargs['mel_basis'], spec)
-    x = split_window(spec, kwargs['n_frames']).transpose((0, 2, 1))
+    x = split_window(
+        spec if spec.shape[1] >= kwargs['n_frames'] else np.hstack(
+            (spec, np.zeros((spec.shape[0], kwargs['n_frames']-spec.shape[1])))
+        ),
+        kwargs['n_frames']
+    ).transpose((0, 2, 1))
 
     # load actual model and predict
     embedding, mask = kwargs['model'].predict(x)
     y_embd = from_embedding(embedding, kwargs['n_channels'])
     y_mask = from_mask(mask)
-    mask_embd = merge_windows_most_common(y_embd)[:, :, :spec.shape[1]]
-    mask_mask = merge_windows_mean(y_mask)[:, :, :spec.shape[1]]
+    mask_embd = merge_windows_most_common(y_embd)[:, :, :phase.shape[1]]
+    mask_mask = merge_windows_mean(y_mask)[:, :, :phase.shape[1]]
 
     # reconstruct from prediction
     if kwargs['plot_spectrograms']:
