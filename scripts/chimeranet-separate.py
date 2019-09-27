@@ -57,7 +57,8 @@ def part(input_path, **kwargs):
 
     # load actual model and predict
     embedding, mask = kwargs['model'].predict(x)
-    y_embd = from_embedding(embedding, kwargs['n_channels'])
+    y_embd = from_embedding(
+        embedding, kwargs['n_channels'], n_jobs=kwargs['jobs'])
     y_mask = from_mask(mask)
     mask_embd = merge_windows_most_common(y_embd)[:, :, :phase.shape[1]]
     mask_mask = merge_windows_mean(y_mask)[:, :, :phase.shape[1]]
@@ -234,6 +235,11 @@ def parse_args():
         '--mask-inference-name', type=str, metavar='NAME',
         default='mask',
         help='Inference name of embedding',
+    )
+    advanced_output_group.add_argument(
+        '-j', '--jobs', type=int, metavar='N',
+        default=1,
+        help='The number of jobs of k-means clustering',
     )
 
     args = parser.parse_args()
