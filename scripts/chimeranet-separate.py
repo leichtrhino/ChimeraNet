@@ -48,20 +48,40 @@ def part(input_path, **kwargs):
     )
     if 0 < kwargs['n_mels'] < kwargs['n_fft'] // 2 + 1:
         spec = np.dot(kwargs['mel_basis'], spec)
-    x = split_window(
-        spec if spec.shape[1] >= kwargs['n_frames'] else np.hstack(
-            (spec, np.zeros((spec.shape[0], kwargs['n_frames']-spec.shape[1])))
-        ),
-        kwargs['n_frames']
-    ).transpose((0, 2, 1))
 
-    # load actual model and predict
-    embedding, mask = kwargs['model'].predict(x)
-    y_embd = from_embedding(
-        embedding, kwargs['n_channels'], n_jobs=kwargs['jobs'])
-    y_mask = from_mask(mask)
-    mask_embd = merge_windows_most_common(y_embd)[:, :, :phase.shape[1]]
-    mask_mask = merge_windows_mean(y_mask)[:, :, :phase.shape[1]]
+    mask_embd = np.empty((kwargs['n_channels'], kwargs['n_mels'], 0))
+    mask_mask = np.empty((kwargs['n_channels'], kwargs['n_mels'], 0))
+    n_batch \
+        = int(np.ceil(
+            spec.shape[1] / kwargs['n_frames'] / kwargs['batch_size']
+        )) if kwargs['batch_size'] > 0 else 0
+    for batch_i in range(max(n_batch, 1)):
+        if n_batch == 0:
+            s = spec
+        else:
+            window_size = kwargs['batch_size']*kwargs['n_frames']
+            s = spec[:, batch_i*window_size:(batch_i+1)*window_size]
+        if s.shape[1] < kwargs['n_frames']:
+            s = np.hstack(
+                (s, np.zeros((s.shape[0], kwargs['n_frames']-s.shape[1])))
+            )
+        x = split_window(s, kwargs['n_frames']).transpose((0, 2, 1))
+
+        # predict
+        embedding, mask = kwargs['model'].predict(x)
+        y_embd = from_embedding(
+            embedding, kwargs['n_channels'], n_jobs=kwargs['jobs'])
+        y_mask = from_mask(mask)
+        mini_mask_embd = merge_windows_most_common(y_embd)[:, :, :s.shape[1]]
+        mini_mask_mask = merge_windows_mean(y_mask)[:, :, :s.shape[1]]
+        ordered_mini_mask_embd = min(
+            (t for t in permutations(mini_mask_embd)),
+            key=lambda t: np.sum(np.abs(np.array(t)-mini_mask_mask)*s)
+        )
+        mask_embd = np.dstack((mask_embd, ordered_mini_mask_embd))
+        mask_mask = np.dstack((mask_mask, mini_mask_mask))
+    mask_embd = mask_embd[:, :, :spec.shape[1]]
+    mask_mask = mask_mask[:, :, :spec.shape[1]]
 
     # reconstruct from prediction
     if kwargs['plot_spectrograms']:
@@ -173,6 +193,10 @@ def parse_args():
     basic_group.add_argument(
         '-d', '--output-directory', type=str, metavar='DIR',
         help='If specified, add it as top directory of "--output-audio"'
+    )
+    basic_group.add_argument(
+        '--batch-size', type=int, metavar='N', default=0,
+        help='Batch size on separation'
     )
 
     # audio arguments
