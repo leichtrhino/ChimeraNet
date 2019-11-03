@@ -7,10 +7,10 @@ An implementation of music separation model by Luo et.al.
 
 0. Prepare .wav files to separate.
 1. Install library
-`pip install git+https://github.com/arity-r/ChimeraNet`
+`pip install git+https://github.com/leichtrhino/ChimeraNet`
 
-2. Download [pretrained model](https://github.com/arity-r/chimeranet-models/raw/master/utterance-music/bisep_120.hdf5).
-3. Download [sample script](https://raw.githubusercontent.com/arity-r/ChimeraNet/master/scripts/chimeranet-separate.py).
+2. Download [pretrained model](https://drive.google.com/open?id=15WjT_bj3Q2sJfqqyM4BdaYxqy9ML1SUi).
+3. Download [sample script](https://raw.githubusercontent.com/leichtrhino/ChimeraNet/master/scripts/chimeranet-separate.py).
 4. Run script
 
 ```
@@ -26,7 +26,7 @@ Output in nutshell
 
 ##### Train and separation examples
 
-See [Example section on ChimeraNet documentation](https://arity-r.github.io/ChimeraNet/examples.html).
+See [Example section on ChimeraNet documentation](https://leichtrhino.github.io/ChimeraNet/examples.html).
 
 ### Install
 
@@ -40,7 +40,7 @@ See [Example section on ChimeraNet documentation](https://arity-r.github.io/Chim
 
 ##### Instructions
 
-1. Run `pip install git+https://github.com/arity-r/ChimeraNet` or
+1. Run `pip install git+https://github.com/leichtrhino/ChimeraNet` or
 any python package installer.
 (Currently, `ChimeraNet` is not in PyPI.)
 2. Install keras' backend if the environment does not have any.

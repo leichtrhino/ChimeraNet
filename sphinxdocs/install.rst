@@ -13,5 +13,5 @@ Requirements
 Instructions
 ------------
 
-1. Run ``pip install git+https://github.com/arity-r/ChimeraNet`` or any python package installer. (Currently, ChimeraNet is not in PyPI.)
+1. Run ``pip install git+https://github.com/leichtrhino/ChimeraNet`` or any python package installer. (Currently, ChimeraNet is not in PyPI.)
 2. Install keras' backend if the environment does not have any. Install tensorflow if unsure.

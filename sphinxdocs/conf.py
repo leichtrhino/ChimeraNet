@@ -17,8 +17,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'ChimeraNet'
-copyright = '2019, arity-r'
-author = 'arity-r'
+copyright = '2019, leichtrhino'
+author = 'leichtrhino'
 
 # -- General configuration ---------------------------------------------------
 
